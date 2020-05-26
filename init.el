@@ -1,10 +1,3 @@
-;;
-;; The site
-;;https://github.com/ianpan870102/yay-evil-emacs/blob/master/config.org
-;; is super handig.
-
-;;; Code:
-
 (setq package-check-signature 'nil) ;; anders gaat ie om een gpg signature vragen, heel irritant
 
 (require 'package)

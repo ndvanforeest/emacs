@@ -1,10 +1,14 @@
+;; Searching for help: 
+;; C-h r i search-term 
+
+
 ;; User Info
 (setq user-full-name "Nicky van Foreest")
 (setq user-mail-address "vanforeest@gmail.com")
 
 
 (require 'package)
-(setq package-check-signature 'nil) 
+(setq package-check-signature 'nil)  ;; don't ask for signature files. I also don't know how to do this btw.
 
 (package-initialize)
 (setq package-archives (append package-archives
@@ -39,6 +43,8 @@
         auto-save-default nil ;; Do not autosave.
         indent-tabs-mode nil ;;  use spaces for indentation in stead of hard tabs
         tab-width 4 ;; 
+        sentence-end-double-space 'nil ;; no double space at end of sentence
+        auto-fill-mode -1  ;; don't insert returns in long lines
         frame-title-format (list (format "%s %%S: %%j " (system-name))
               '(buffer-file-name "%f" (dired-directory dired-directory "%b"))
               )
@@ -47,6 +53,7 @@
   (fset 'yes-or-no-p 'y-or-n-p) ;; Change all yes/no questions to y/n type
   (set-face-attribute 'default nil :height 95) ;; make font slightly smaller
   (set-language-environment "UTF-8") ; Allow for French accents
+  (global-hl-line-mode t)  ;; highlight the line with point
   (defun accents ()
     (interactive)
     (activate-input-method "latin-1-alt-postfix")
@@ -58,14 +65,16 @@
   :hook (before-save whitespace-cleanup)
   )
 
-
 (use-package material-theme
   :ensure t
   )
 
 (use-package better-defaults
   :ensure t
-  :config (column-number-mode t)
+  :config
+  (column-number-mode t)
+  (global-linum-mode t) ;; enable line numbers globally
+  :bind ("M-z" . 'zap-to-char) ;; Weird, but this does not work without the '
   )
 
 (use-package diminish ;; suppress minor modes, but I don't seem to see the effect of it.
@@ -111,6 +120,13 @@
   :hook (prog-mode . electric-pair-mode)
   )
 
+(use-package files 
+  :ensure nil
+  :config
+  (setq confirm-kill-processes nil;  "Just kill, do not aske for confirmation
+        make-backup-files nil ;; My copies are on dropbox and github
+        )
+  ) 
 
 (use-package deft  ;; very practical note taking package
   :ensure t
@@ -142,3 +158,5 @@
         )
   :hook(python-mode . blacken-mode)   ;; autoformat with black on save
   )
+
+

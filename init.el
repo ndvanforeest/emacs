@@ -52,6 +52,7 @@
         visible-bell t
         load-prefer-newer t
 	apropos-do-all t
+        mouse-yank-at-point t;; middle-mouse-click pastes at mouse location
         )
 
   (menu-bar-mode -1)
@@ -148,7 +149,9 @@
 (use-package ediff
   ; side by side differences rather than in two buffers under neath each other.
   :ensure nil
-  :config (setq ediff-split-window-function 'split-window-horizontally)
+  :config (setq ediff-split-window-function 'split-window-horizontally
+		ediff-window-setup-function 'ediff-setup-windows-plain ;; otherwise ediff opens another window
+		)
   )
 
 
@@ -173,8 +176,6 @@
   :config (smex-initialize)
 )
 
-
-
 ;; Company is a text completion framework for Emacs. The name stands for "complete anything". 
 (use-package company
   :ensure t
@@ -187,6 +188,13 @@
   (setq company-idle-delay 0.0)
   (global-company-mode t)
   )
+
+
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode)
+  )
+
 
 (use-package deft  ;; very practical note taking package
   :ensure t

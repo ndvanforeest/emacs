@@ -10,10 +10,12 @@
 
 I learned a lot about emacs from the following sites
 
+- [Emacs help]()https://www.emacswiki.org/emacs/EmacsNewbieHelpReference)
 - https://sachachua.com/blog/emacs/ Here you can also find the very useful emacs weekly newsletter
 - https://www.masteringemacs.org/
 - http://pragmaticemacs.com/
-
+- https://nasseralkmim.github.io/notes/2016/08/21/my-latex-environment/
+- [Ido](https://www.masteringemacs.org/article/introduction-to-ido-mode)
 
 # Useful posts
 

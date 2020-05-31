@@ -1,0 +1,14 @@
+.python-environments/
+ac-comphist.dat
+auto-save-list/
+bookmarks
+custom.el
+*.el~
+elpa/
+elpy/
+ido.last
+init_old.el
+places
+recentf
+smex-items
+transient

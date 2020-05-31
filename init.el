@@ -36,8 +36,7 @@
   (setq ;; ring-bell-function 'ignore       ; no sound
         visible-bell t  ;; flash if command makes no sense, like when C-g has nothing to do
         frame-resize-pixelwise t
-        ; default-directory "~/"   ;; todo, perhaps I want "."
-        default-directory "."  
+        default-directory "~/"   ;; don't set it to . because that seems to lead to a cycle
         inhibit-startup-message t
 	inhibit-startup-echo-area-message t
         kill-whole-line 'always  

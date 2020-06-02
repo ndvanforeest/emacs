@@ -354,6 +354,13 @@
   :init (setq markdown-command "multimarkdown")
 )
 
+
+(use-package csv-mode
+    :ensure t
+    :mode ("\\.[Cc][Ss][Vv]\\'" . csv-mode)
+    :config (setq csv-separators '("," ";" "|" " "))
+    )
+
 (use-package magit
   :ensure t
   :bind (("C-x g" . magit-status))

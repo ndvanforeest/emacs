@@ -1,5 +1,8 @@
 ;; Searching for help: 
 ;; C-h r i search-term 
+;; reload file
+;; M-x eval-buffer
+
 
 
 ;; User Info
@@ -12,9 +15,11 @@
 
 (package-initialize)
 (setq package-archives (append package-archives
-			 '(("melpa" . "http://melpa.org/packages/")
-			 ("gnu" . "http://elpa.gnu.org/packages/")
-			 ("elpy" . "http://jorgenschaefer.github.io/packages/"))))
+			 '( ("melpa-stable" . "https://stable.melpa.org/packages/")
+			    ("melpa" . "http://melpa.org/packages/")
+			    ("gnu" . "http://elpa.gnu.org/packages/")
+			    ("elpy" . "http://jorgenschaefer.github.io/packages/")))
+      )
 (package-initialize)
 
 
@@ -243,8 +248,8 @@
   )
 
 
-(use-package latex ;tex-site ;; If I don't use latex here, the add-to-list below does not work
-  ; :ensure auctex
+(use-package tex-site ;; If I don't use latex here, the add-to-list below does not work
+  :ensure auctex
   :defer t
   :mode ("\\.tex\\'" . TeX-latex-mode)
   :init
@@ -288,7 +293,6 @@
   (add-hook 'LaTeX-mode-hook
             (lambda ()
               (visual-line-mode) ; hiermee kan een zin over meerdere regels lopen, zonder dat ie wordt opgehakt.
-	      (remove-electric-indent-mode)
               (turn-on-reftex); load reftex
               (LaTeX-math-mode) ; enable math-mode right away in  math environment; `a expands right away to \alpha
 	      (electric-indent-local-mode -1)

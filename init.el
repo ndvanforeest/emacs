@@ -1,7 +1,6 @@
 ;; Searching for help: 
 ;; C-h r i search-term 
-;; reload file
-;; M-x eval-buffer
+;; M-x eval-buffer ;; reload file
 
 
 
@@ -248,7 +247,7 @@
   )
 
 
-(use-package tex-site ;; If I don't use latex here, the add-to-list below does not work
+(use-package latex; tex-site ;; If I don't use latex here, the add-to-list below does not work
   :ensure auctex
   :defer t
   :mode ("\\.tex\\'" . TeX-latex-mode)
@@ -261,7 +260,7 @@
   (setq TeX-auto-save t
         TeX-parse-self t
         TeX-save-query nil  ;dont ask to save if you want to compile with C-c C-c
-        TeX-PDF-mode t      ; use pdflatex
+        LaTeX-command-style '(("" "%(PDF)%(latex) -shell-escape %S%(PDFout)"))
         TeX-file-extensions '("tex" "sty")
         TeX-ispell-extend-skip-list t
 	reftex-isearch-minor-mode t ; search whole document, not just the current file

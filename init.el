@@ -35,6 +35,7 @@
 (eval-when-compile
   (require 'use-package))
 
+
 (use-package emacs
   :config
   (setq ;; ring-bell-function 'ignore       ; no sound
@@ -42,7 +43,7 @@
         frame-resize-pixelwise t
         default-directory "~/"   ;; don't set it to . because that seems to lead to a cycle
         inhibit-startup-message t
-	inhibit-startup-echo-area-message t
+        inhibit-startup-echo-area-message t
         kill-whole-line 'always  
         load-prefer-newer t ;;   Don't use the compiled code if it's the older package.
         create-lockfiles nil ;; no lockfiles
@@ -54,9 +55,11 @@
         frame-title-format (list (format "%s %%S: %%j " (system-name))
               '(buffer-file-name "%f" (dired-directory dired-directory "%b"))
               )
-	require-final-newline t
-	apropos-do-all t
+        require-final-newline t
+        apropos-do-all t
         mouse-yank-at-point t;; middle-mouse-click pastes at mouse location
+        ;; initial-scratch-message "" ; make scratch message empty
+        kill-buffer "*scratch*"
         )
 
   (menu-bar-mode -1)
@@ -118,7 +121,7 @@
 	ido-default-buffer-method 'selected-window
 	ido-file-extensions-order '(".tex" ".py")
 	completion-ignored-extensions '(".o" ".pdf" "~" ".bin" ".ilg" ".idx" ".ind" ".log"
-                                      ".obj" ".map" ".a" ".so" ".ptxcode" ".toc" ".rel" ".out"
+                                      ".obj" ".map" ".a" ".so" ".pytxcode" ".toc" ".rel" ".out" 
                                       ".mod" ".aux" ".out" ".pyg")
 	ido-ignore-extensions t  ;; ignore files with the above extensions
 	ido-ignore-directories '("auto" "_minted*" "__pycache__" ".git") ;; this works with C-x d, but not with C-x C-f
@@ -255,7 +258,7 @@
   (setq reftex-plug-into-AUCTeX t )
   :bind (("M-q" . ales/fill-paragraph))  ;; start every sentence on a new line
   :config
-  (setq-default TeX-master nil ); by each new fie AUCTEX will ask for a master fie.
+  ;; (setq-default TeX-master nil ); by each new fie AUCTEX will ask for a master fie.
   (setq-default auto-fill-function nil) ;; 
   (setq TeX-auto-save t
         TeX-parse-self t

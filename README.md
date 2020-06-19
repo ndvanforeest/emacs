@@ -15,6 +15,7 @@ I learned a lot about emacs from the following sites
 - [Emacs help](https://www.emacswiki.org/emacs/EmacsNewbieHelpReference)
 - [Ido](https://www.masteringemacs.org/article/introduction-to-ido-mode)
 - http://pragmaticemacs.com/
+- https://github.com/emacs-tw/awesome-emacs
 
 # Useful posts
 

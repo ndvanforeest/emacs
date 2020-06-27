@@ -90,6 +90,21 @@
   :hook (before-save whitespace-cleanup)
   )
 
+; (usepackage org)
+(require 'org)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((shell . t)
+   (python . t)
+   (emacs-lisp . t)
+   )
+ )
+(add-to-list 'org-structure-template-alist '("p" . "src python 
+"))
+;; Execute source code blocks (C-c C-c) without asking for conformation
+(setq org-confirm-babel-evaluate nil) 
+
+
 (use-package uniquify
   ;; use <dir-name> behind file name to distinguish files
   :config

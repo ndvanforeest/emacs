@@ -41,7 +41,8 @@
   (setq ;; ring-bell-function 'ignore       ; no sound
         visible-bell t  ;; flash if command makes no sense, like when C-g has nothing to do
         frame-resize-pixelwise t
-        default-directory "~/"   ;; don't set it to . because that seems to lead to a cycle
+	;; Setting the default directory to ~ does not work the way I want. 
+        ;; default-directory "~/"   ;; don't set it to . because that seems to lead to a cycle
         inhibit-startup-message t
         inhibit-startup-echo-area-message t
         kill-whole-line 'always  
@@ -239,12 +240,13 @@
   :defer
   :bind ("C-c d" . deft)
   :config
-  (setq deft-extensions '("txt"))
+  (setq deft-extensions '("txt" "tex" "org"))
   (setq deft-directory "~/org/deft")
   (setq deft-auto-save-interval 0)
   )
 
-;; ensure to have run pip install jedi flake8 importmagic autopep8 yapf
+;; ensure to have run pip install jedi flake8
+;; Some people say the following is also necessary, but I skipped them : pip install importmagic autopep8 yapf
 (use-package elpy
   :ensure t
   :after python
@@ -366,14 +368,19 @@
         )
   )
 
-(use-package markdown-mode
-  :ensure t
-  :commands (markdown-mode gfm-mode)
-  :mode (("README\\.md\\'" . gfm-mode)
-         ("\\.md\\'" . markdown-mode)
-         ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "multimarkdown")
-)
+;; I dont use markdown anymore, but moved to org-mode.
+;;  If necessary, call pandoc to convert to markdown.
+;; (use-package markdown-mode
+;;   :ensure t
+;;   :commands (markdown-mode gfm-mode)
+;;   :mode (("README\\.md\\'" .
+;;   gfm-mode)
+;;          ("\\.md\\'" .
+;; 	 markdown-mode)
+;;          ("\\.markdown\\'" .
+;; 	 markdown-mode))
+;;   :init (setq markdown-command "multimarkdown")
+;; )
 
 
 (use-package csv-mode

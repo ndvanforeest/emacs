@@ -1,14 +1,28 @@
-;; Searching for help: 
-;; C-h r i search-term 
-;; M-x eval-buffer ;; reload file
+* My =init.el= file
 
+I just moved my =init.el= to an =init.org= file. Over time I'll work on the documentation. 
 
+** Tangling
 
-;; User Info
+I'll  define all of the src blocks with  a =:tangle yes= header so that I can extract all lisp with one command.
+
+#+BEGIN_SRC emacs-lisp
+(org-babel-tangle)
+#+END_SRC
+
+#+RESULTS:
+| init.el |
+
+** User info
+
+#+BEGIN_SRC emacs-lisp :tangle yes
 (setq user-full-name "Nicky van Foreest")
 (setq user-mail-address "vanforeest@gmail.com")
+#+END_SRC
 
+** The rest
 
+#+BEGIN_SRC emacs-lisp :tangle yes
 (require 'package)
 (setq package-check-signature 'nil)  ;; don't ask for signature files. I also don't know how to do this btw.
 
@@ -87,34 +101,76 @@
          ("M-/" . hippie-expand)  ;; useful, at least in python mode to autocomplete filenames in open("..")
          ("C-X C-b" . ibuffer) 
          ("M-o" . other-window)  ;; quicker than C-x o
+	 ("M-z" . zap-up-to-char)
          )
   :hook (before-save whitespace-cleanup)
   )
 
-; (usepackage org)
-(require 'org)
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((shell . t)
-   (python . t)
-   (emacs-lisp . t)
+
+;; (use-package misc
+;;   ;;   "Kill up to, but not including ARGth occurrence of CHAR."
+;;   :bind (("M-z" . zap-up-to-char))
+;;   )
+
+(use-package org
+  :config
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((shell . t)
+     (python . t)
+     (emacs-lisp . t)
+     )
    )
- )
-(add-to-list 'org-structure-template-alist '("p" . "src python 
-"))
-;; Execute source code blocks (C-c C-c) without asking for conformation
-(setq org-confirm-babel-evaluate nil) 
+  (add-to-list 'org-structure-template-alist
+               '("p" . "src python ")
+               )
+  (setq org-confirm-babel-evaluate nil
+	org-latex-pdf-process
+	'("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
+	;; '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+	;;   "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
+	org-src-preserve-indentation t
+	org-src-fontify-natively t )
+  ;; (setq org-babel-default-header-args:python
+  ;;     '((:results . "output replace")
+  ;; 	(:session . "none")
+  ;; 	(:exports . "both")
+  ;; 	(:tangle . "no")))
+  ;; (setq org-babel-default-header-args:python
+  ;;     '((:results . "output replace")
+  ;; 	(:session . "none")
+  ;; 	(:exports . "both")
+  ;; 	(:cache .   "no")
+  ;; 	(:noweb . "no")
+  ;; 	(:hlines . "no")
+  ;; 	(:tangle . "no")
+  ;; 	(:eval . "never-export")))
+  (setq org-latex-listings 'minted)
+  :hook (org-mode . turn-on-org-cdlatex)
+)
+
+(use-package ox-gfm
+  :ensure t
+  )
+
+
+(use-package yasnippet
+  :ensure t
+  :config
+  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+  (yas-global-mode 1))
+
+
+;; Handy shorthands for latex, I use it mainly when in org-mode. For the rest I am happy with auctex. In fact, I guess I'll be perfectly happy with using yasnippets.
+;; (use-package cdlatex
+;;   :ensure t
+;;   )
 
 
 (use-package uniquify
   ;; use <dir-name> behind file name to distinguish files
   :config
   (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
-  )
-
-(use-package misc
-  ;;   "Kill up to, but not including ARGth occurrence of CHAR."
-  :bind (("M-z" . zap-up-to-char))
   )
 
 
@@ -395,3 +451,4 @@
   )
 
 
+#+END_SRC

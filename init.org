@@ -20,21 +20,20 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
 (setq user-mail-address "vanforeest@gmail.com")
 #+END_SRC
 
-** The rest
+** Finding packages and setup of use-package
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 (require 'package)
 (setq package-check-signature 'nil)  ;; don't ask for signature files. I also don't know how to do this btw.
 
-(package-initialize)
+;; (package-initialize)
 (setq package-archives (append package-archives
 			 '( ("melpa-stable" . "https://stable.melpa.org/packages/")
 			    ("melpa" . "http://melpa.org/packages/")
 			    ("gnu" . "http://elpa.gnu.org/packages/")
-			    ("elpy" . "http://jorgenschaefer.github.io/packages/")))
-      )
-(package-initialize)
+			    ("elpy" . "http://jorgenschaefer.github.io/packages/"))) )
 
+(package-initialize)
 
 ;; Bootstrap `use-package'
 (unless (package-installed-p 'use-package)
@@ -44,12 +43,14 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 
-
 ;; Enable use-package
 (eval-when-compile
   (require 'use-package))
+#+end_src
 
+** General emacs config
 
+#+begin_src emacs-lisp :tangle yes
 (use-package emacs
   :config
   (setq ;; ring-bell-function 'ignore       ; no sound
@@ -105,13 +106,15 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
          )
   :hook (before-save whitespace-cleanup)
   )
+#+end_src
 
 
-;; (use-package misc
-;;   ;;   "Kill up to, but not including ARGth occurrence of CHAR."
-;;   :bind (("M-z" . zap-up-to-char))
-;;   )
 
+** Org mode 
+
+I commented several default settings here. I think I prefer to have these options set per file, not here. 
+
+#+begin_src emacs-lisp :tangle yes
 (use-package org
   :config
   (org-babel-do-load-languages
@@ -127,8 +130,6 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
   (setq org-confirm-babel-evaluate nil
 	org-latex-pdf-process
 	'("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
-	;; '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-	;;   "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
 	org-src-preserve-indentation t
 	org-src-fontify-natively t )
   ;; (setq org-babel-default-header-args:python
@@ -148,25 +149,38 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
   (setq org-latex-listings 'minted)
   :hook (org-mode . turn-on-org-cdlatex)
 )
+#+end_src
 
+
+** Enable simple export to github markdown
+#+begin_src emacs-lisp :tangle yes
 (use-package ox-gfm
   :ensure t
   )
+#+end_src
 
+** Snippets
 
+#+begin_src emacs-lisp :tangle yes
 (use-package yasnippet
   :ensure t
   :config
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
   (yas-global-mode 1))
+#+end_src
 
+=cdlatex= may be practical to use in org-mode.
+But for the moment (20200719), I use =auctex=, and I'll try =yasnippets=; if this will be not work to my satisfaction, I might perhaps change to =cdlatex=.
 
-;; Handy shorthands for latex, I use it mainly when in org-mode. For the rest I am happy with auctex. In fact, I guess I'll be perfectly happy with using yasnippets.
+#+begin_src emacs-lisp :tangle yes
 ;; (use-package cdlatex
 ;;   :ensure t
 ;;   )
+#+end_src
 
+** The rest
 
+#+begin_src emacs-lisp :tangle yes
 (use-package uniquify
   ;; use <dir-name> behind file name to distinguish files
   :config
@@ -451,4 +465,4 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
   )
 
 
-#+END_SRC
+#+end_src

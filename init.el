@@ -1,28 +1,6 @@
-* My =init.el= file
-
-I just moved my =init.el= to an =init.org= file. Over time I'll work on the documentation. 
-
-** Tangling
-
-I'll  define all of the src blocks with  a =:tangle yes= header so that I can extract all lisp with one command.
-
-#+BEGIN_SRC emacs-lisp
-(org-babel-tangle)
-#+END_SRC
-
-#+RESULTS:
-| init.el |
-
-** User info
-
-#+BEGIN_SRC emacs-lisp :tangle yes
 (setq user-full-name "Nicky van Foreest")
 (setq user-mail-address "vanforeest@gmail.com")
-#+END_SRC
 
-** Finding packages and setup of use-package
-
-#+BEGIN_SRC emacs-lisp :tangle yes
 (require 'package)
 (setq package-check-signature 'nil)  ;; don't ask for signature files. I also don't know how to do this btw.
 
@@ -46,11 +24,7 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
 ;; Enable use-package
 (eval-when-compile
   (require 'use-package))
-#+end_src
 
-** General emacs config
-
-#+begin_src emacs-lisp :tangle yes
 (use-package emacs
   :config
   (setq ;; ring-bell-function 'ignore       ; no sound
@@ -106,15 +80,7 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
          )
   :hook (before-save whitespace-cleanup)
   )
-#+end_src
 
-
-
-** Org mode 
-
-I commented several default settings here. I think I prefer to have these options set per file, not here. 
-
-#+begin_src emacs-lisp :tangle yes
 (use-package org
   :config
   (org-babel-do-load-languages
@@ -149,44 +115,21 @@ I commented several default settings here. I think I prefer to have these option
   (setq org-latex-listings 'minted)
   :hook (org-mode . turn-on-org-cdlatex)
 )
-#+end_src
 
-
-** Enable simple export to github markdown
-#+begin_src emacs-lisp :tangle yes
 (use-package ox-gfm
   :ensure t
   )
-#+end_src
 
-** Snippets
-
-#+begin_src emacs-lisp :tangle yes
 (use-package yasnippet
   :ensure t
   :config
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
   (yas-global-mode 1))
-#+end_src
 
-BTW, after adding or changing a snippet's definition, run:
-#+BEGIN_SRC emacs-lisp
-(yas-reload-all)
-#+END_SRC
-
-
-=cdlatex= may be practical to use in org-mode.
-But for the moment (20200719), I use =auctex=, and I'll try =yasnippets=; if this will be not work to my satisfaction, I might perhaps change to =cdlatex=.
-
-#+begin_src emacs-lisp :tangle yes
 ;; (use-package cdlatex
 ;;   :ensure t
 ;;   )
-#+end_src
 
-** The rest
-
-#+begin_src emacs-lisp :tangle yes
 (use-package uniquify
   ;; use <dir-name> behind file name to distinguish files
   :config
@@ -469,6 +412,3 @@ But for the moment (20200719), I use =auctex=, and I'll try =yasnippets=; if thi
   :ensure t
   :bind (("C-x g" . magit-status))
   )
-
-
-#+end_src

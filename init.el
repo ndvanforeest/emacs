@@ -39,7 +39,7 @@
         create-lockfiles nil ;; no lockfiles
         auto-save-default nil ;; Do not autosave.
         indent-tabs-mode nil ;;  use spaces for indentation in stead of hard tabs
-        tab-width 4 ;; 
+        ;; tab-width 4 ;;  Let's see how far I get with this quoted
         sentence-end-double-space 'nil ;; no double space at end of sentence
         auto-fill-mode -1  ;; don't insert returns in long lines
         frame-title-format (list (format "%s %%S: %%j " (system-name))
@@ -48,11 +48,11 @@
         require-final-newline t
         apropos-do-all t
         mouse-yank-at-point t;; middle-mouse-click pastes at mouse location
+        ;; kill-buffer "*scratch*"  ;; This doesn't seem to do anything.
         ;; initial-scratch-message "" ; make scratch message empty
-        kill-buffer "*scratch*"
-        )
+	)
 
-  (menu-bar-mode -1)
+  (menu-bar-mode -1)  ;; I want to use as much screen as possible.
   (tool-bar-mode -1)
   (scroll-bar-mode -1)
   (horizontal-scroll-bar-mode -1)
@@ -66,8 +66,7 @@
   (set-language-environment "UTF-8") ; Allow for French accents
   (defun accents ()
     (interactive)
-    (activate-input-method "latin-1-alt-postfix")
-    )
+    (activate-input-method "latin-1-alt-postfix") )
   ;; (defun current-lang () ;; I don't know whether I need this to be able to type French characters. 
   ;;   (interactive)
   ;;   (eval-expression current-language-environment)
@@ -78,26 +77,24 @@
          ("M-o" . other-window)  ;; quicker than C-x o
 	 ("M-z" . zap-up-to-char)
          )
-  :hook (before-save whitespace-cleanup)
-  )
+  :hook (before-save whitespace-cleanup) )
 
 (use-package org
   :config
   (org-babel-do-load-languages
-   'org-babel-load-languages
+   'org-babel-load-languages  ; I hope I never need any other languages then these
    '((shell . t)
      (python . t)
      (emacs-lisp . t)
      )
    )
-  (add-to-list 'org-structure-template-alist
-               '("p" . "src python ")
-               )
-  (setq org-confirm-babel-evaluate nil
-	org-latex-pdf-process
-	'("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
+  ;; (add-to-list 'org-structure-template-alist
+  ;;              '("p" . "src python ")
+  ;;              )
+  (setq org-confirm-babel-evaluate nil  ; Don't ask to execute when I press C-c C-c
+	org-latex-pdf-process "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
 	org-src-preserve-indentation t
-	org-src-fontify-natively t )
+	org-src-fontify-natively t )  ; does this work? 
   ;; (setq org-babel-default-header-args:python
   ;;     '((:results . "output replace")
   ;; 	(:session . "none")
@@ -113,8 +110,13 @@
   ;; 	(:tangle . "no")
   ;; 	(:eval . "never-export")))
   (setq org-latex-listings 'minted)
-  :hook (org-mode . turn-on-org-cdlatex)
-)
+  ;; :hook (org-mode . turn-on-org-cdlatex)
+  )
+
+(use-package org-bullets
+:ensure t
+:config
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
 (use-package ox-gfm
   :ensure t
@@ -130,12 +132,14 @@
 ;;   :ensure t
 ;;   )
 
-(use-package uniquify
-  ;; use <dir-name> behind file name to distinguish files
-  :config
-  (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
-  )
+(use-package which-key
+:ensure t
+:config
+(which-key-mode))
 
+(use-package uniquify
+  :config
+  (setq uniquify-buffer-name-style 'post-forward-angle-brackets) )
 
 (use-package dired
   :config
@@ -162,9 +166,7 @@
 	ido-ignore-directories '("auto" "_minted*" "__pycache__" ".git") ;; this works with C-x d, but not with C-x C-f
 	ido-ignore-files '("auto" "_minted*" "__pycache__") ;; this works with C-x C-f
 	)
-  (ido-mode t)
-  )
-
+  (ido-mode t) )
 
 (use-package material-theme
   :ensure t

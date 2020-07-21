@@ -2,6 +2,6 @@
 # name: align
 # key: ali
 # --
-\begin{${1:$$(yas-choose-value '("align*" "align"))}}
+\begin{${1:align*$$(yas-choose-value '("align*" "align"))}}
 $0
 \end{$1}

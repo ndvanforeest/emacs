@@ -1,17 +1,19 @@
-* My =init.el= file
+#+title: My emacs init file
+#+author: Nicky van Foreest
+
+** My =init.el= file
 
 I just moved my =init.el= to an =init.org= file. Over time I'll work on the documentation. 
+
+When you don't know, or forgot, what a function does, put the point on the function name and type =C-h f= to get its documentation; for a variable, type =C-h v=.
 
 ** Tangling
 
 I'll  define all of the src blocks with  a =:tangle yes= header so that I can extract all lisp with one command.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (org-babel-tangle)
 #+END_SRC
-
-#+RESULTS:
-| init.el |
 
 ** User info
 
@@ -48,6 +50,9 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
   (require 'use-package))
 #+end_src
 
+=(package-initialize)= turns out to be necessary.
+
+
 ** General emacs config
 
 #+begin_src emacs-lisp :tangle yes
@@ -65,7 +70,7 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
         create-lockfiles nil ;; no lockfiles
         auto-save-default nil ;; Do not autosave.
         indent-tabs-mode nil ;;  use spaces for indentation in stead of hard tabs
-        tab-width 4 ;; 
+        ;; tab-width 4 ;;  Let's see how far I get with this quoted
         sentence-end-double-space 'nil ;; no double space at end of sentence
         auto-fill-mode -1  ;; don't insert returns in long lines
         frame-title-format (list (format "%s %%S: %%j " (system-name))
@@ -74,11 +79,11 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
         require-final-newline t
         apropos-do-all t
         mouse-yank-at-point t;; middle-mouse-click pastes at mouse location
+        ;; kill-buffer "*scratch*"  ;; This doesn't seem to do anything.
         ;; initial-scratch-message "" ; make scratch message empty
-        kill-buffer "*scratch*"
-        )
+	)
 
-  (menu-bar-mode -1)
+  (menu-bar-mode -1)  ;; I want to use as much screen as possible.
   (tool-bar-mode -1)
   (scroll-bar-mode -1)
   (horizontal-scroll-bar-mode -1)
@@ -92,8 +97,7 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
   (set-language-environment "UTF-8") ; Allow for French accents
   (defun accents ()
     (interactive)
-    (activate-input-method "latin-1-alt-postfix")
-    )
+    (activate-input-method "latin-1-alt-postfix") )
   ;; (defun current-lang () ;; I don't know whether I need this to be able to type French characters. 
   ;;   (interactive)
   ;;   (eval-expression current-language-environment)
@@ -104,34 +108,36 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
          ("M-o" . other-window)  ;; quicker than C-x o
 	 ("M-z" . zap-up-to-char)
          )
-  :hook (before-save whitespace-cleanup)
-  )
+  :hook (before-save whitespace-cleanup) )
 #+end_src
 
+=ibuffer= opens a buffer with a nice overview of all open buffers.
 
 
 ** Org mode 
 
-I commented several default settings here. I think I prefer to have these options set per file, not here. 
+I commented out =org-structure-template-alist= because I use =yasnippets= rather then =<p TAB= to get a python source code block.
+
+I commented out several header settings for =org-babel= code blocks.
+I think I prefer to have these options set per file, not here. 
 
 #+begin_src emacs-lisp :tangle yes
 (use-package org
   :config
   (org-babel-do-load-languages
-   'org-babel-load-languages
+   'org-babel-load-languages  ; I hope I never need any other languages then these
    '((shell . t)
      (python . t)
      (emacs-lisp . t)
      )
    )
-  (add-to-list 'org-structure-template-alist
-               '("p" . "src python ")
-               )
-  (setq org-confirm-babel-evaluate nil
-	org-latex-pdf-process
-	'("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
+  ;; (add-to-list 'org-structure-template-alist
+  ;;              '("p" . "src python ")
+  ;;              )
+  (setq org-confirm-babel-evaluate nil  ; Don't ask to execute when I press C-c C-c
+	org-latex-pdf-process "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
 	org-src-preserve-indentation t
-	org-src-fontify-natively t )
+	org-src-fontify-natively t )  ; does this work? 
   ;; (setq org-babel-default-header-args:python
   ;;     '((:results . "output replace")
   ;; 	(:session . "none")
@@ -147,8 +153,18 @@ I commented several default settings here. I think I prefer to have these option
   ;; 	(:tangle . "no")
   ;; 	(:eval . "never-export")))
   (setq org-latex-listings 'minted)
-  :hook (org-mode . turn-on-org-cdlatex)
-)
+  ;; :hook (org-mode . turn-on-org-cdlatex)
+  )
+#+end_src
+
+
+
+Make nice bullets when viewing =.org= files
+#+begin_src emacs-lisp :tangle yes
+(use-package org-bullets
+:ensure t
+:config
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+end_src
 
 
@@ -177,6 +193,7 @@ BTW, after adding or changing a snippet's definition, run:
 
 =cdlatex= may be practical to use in org-mode.
 But for the moment (20200719), I use =auctex=, and I'll try =yasnippets=; if this will be not work to my satisfaction, I might perhaps change to =cdlatex=.
+In that case, do not forget to switch on the hook when org-mode is loaded. 
 
 #+begin_src emacs-lisp :tangle yes
 ;; (use-package cdlatex
@@ -184,16 +201,31 @@ But for the moment (20200719), I use =auctex=, and I'll try =yasnippets=; if thi
 ;;   )
 #+end_src
 
-** The rest
+
+#+begin_src emacs-lisp :tangle yes
+(use-package which-key
+:ensure t
+:config
+(which-key-mode))
+#+end_src
+
+
+** Uniquify
+
+Put a dir-name behind a file name when files have the same name. 
 
 #+begin_src emacs-lisp :tangle yes
 (use-package uniquify
-  ;; use <dir-name> behind file name to distinguish files
   :config
-  (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
-  )
+  (setq uniquify-buffer-name-style 'post-forward-angle-brackets) )
+#+end_src
+
+** dired
+
+When browsing through the directories, I want the windows that dired opens killed.
 
 
+#+begin_src emacs-lisp :tangle yes
 (use-package dired
   :config
   (setq delete-by-moving-to-trash t)
@@ -202,7 +234,16 @@ But for the moment (20200719), I use =auctex=, and I'll try =yasnippets=; if thi
     #'(lambda ()
         (put 'dired-find-alternate-file 'disabled nil)
         (define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file))))
+#+end_src
 
+
+
+** ido
+
+=ido= provides auto completion to find files and open buffers.
+It also hides lots of files I typically don't want to see when searching for/opening files from a directory.
+
+#+begin_src emacs-lisp :tangle yes
 (use-package ido
   :config
   (setq ido-everywhere t
@@ -219,9 +260,13 @@ But for the moment (20200719), I use =auctex=, and I'll try =yasnippets=; if thi
 	ido-ignore-directories '("auto" "_minted*" "__pycache__" ".git") ;; this works with C-x d, but not with C-x C-f
 	ido-ignore-files '("auto" "_minted*" "__pycache__") ;; this works with C-x C-f
 	)
-  (ido-mode t)
-  )
+  (ido-mode t) )
+#+end_src
 
+** The rest
+
+
+#+begin_src emacs-lisp :tangle yes
 
 (use-package material-theme
   :ensure t

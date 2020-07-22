@@ -201,6 +201,10 @@ In that case, do not forget to switch on the hook when org-mode is loaded.
 ;;   )
 #+end_src
 
+** Which keys
+
+After typing the beginning of a keychord, like C-c, this package opens, after a second or so, the modeline with an overview of all possible keychords that have that particular combination as a start.
+I don't know whether I find this useful.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package which-key
@@ -222,7 +226,7 @@ Put a dir-name behind a file name when files have the same name.
 
 ** dired
 
-When browsing through the directories, I want the windows that dired opens killed.
+When browsing through the directories, I want the intermediate buffers that dired opens killed.
 
 
 #+begin_src emacs-lisp :tangle yes

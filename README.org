@@ -1,0 +1,55 @@
+* Installing Emacs
+
+1. Close Emacs.
+2. =rm -rf ~/.emacs.d=
+3. =git clone  https://github.com/ndvanforeest/emacs.git=
+4. Open Emacs, it will download all the packages. (Ignore the warnings
+   on the first launch.)
+5. Start using it! :tada:
+
+* General information on emacs
+
+I learned a lot about emacs from the following sites
+
+- [[https://sachachua.com/blog/emacs/][Sacha Chua]] Here you can find
+  many useful posts and subscribe to the extremely useful emacs weekly
+  newsletter.
+- [[https://www.masteringemacs.org/][Mastering Emacs]]. A really nice
+  book about emacs.
+- [[https://www.emacswiki.org/emacs/EmacsNewbieHelpReference][Emacs wiki]]
+- http://pragmaticemacs.com/
+- https://github.com/emacs-tw/awesome-emacs
+- [[https://cestlaz.github.io/stories/emacs/][CestlaZ]] A series of youtube movies by Mike Zamansky on how to work with and configure emacs.
+ He gives many useful suggestions. 
+- [[https://www.gnu.org/software/emacs/manual/pdf/eintr.pdf][Chassel]] An introduction to programming in elisp
+
+
+* Useful posts
+  :PROPERTIES:
+  :CUSTOM_ID: useful-posts
+  :END:
+
+- https://menno.io/posts/use-package/
+- https://medium.com/@suvratapte/configuring-emacs-from-scratch-use-package-c30382297877
+- [[https://www.masteringemacs.org/article/introduction-to-ido-mode][Ido]]
+
+* Configuring emacs and useful init examples
+  :PROPERTIES:
+  :CUSTOM_ID: configuring-emacs-and-useful-init-examples
+  :END:
+
+- https://github.com/suvratapte/dot-emacs-dot-d
+- https://github.com/gjstein/emacs.d
+- https://github.com/ianpan870102/yay-evil-emacs/blob/master/config.org
+- https://github.com/technomancy/better-defaults
+- https://nasseralkmim.github.io/notes/2016/08/21/my-latex-environment/
+
+* My own init.el
+  :PROPERTIES:
+  :CUSTOM_ID: my-own-init.el
+  :END:
+
+I only use org-mode, latex, python, and git (and sometimes plain txt).
+I think I optimized my init.el for this, and I stripped all the rest.
+
+I decided to not tinker with the  standard emacs key bindings;  over the years I have noticed that they are mostly very well thought-out, and, perhaps more importantly, they don't change.

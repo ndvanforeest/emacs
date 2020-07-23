@@ -1,61 +1,14 @@
 #+title: My emacs init file
 #+author: Nicky van Foreest
+#+STARTUP: overview 
+#+PROPERTY: header-args :comments yes :results silent
 
-** My =init.el= file
-
-I just moved my =init.el= to an =init.org= file. Over time I'll work on the documentation. 
 
 When you don't know, or forgot, what a function does, put the point on the function name and type =C-h f= to get its documentation; for a variable, type =C-h v=.
 
-** Tangling
+* General emacs config
 
-I'll  define all of the src blocks with  a =:tangle yes= header so that I can extract all lisp with one command.
-
-#+BEGIN_SRC emacs-lisp :results output silent
-(org-babel-tangle)
-#+END_SRC
-
-** User info
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-(setq user-full-name "Nicky van Foreest")
-(setq user-mail-address "vanforeest@gmail.com")
-#+END_SRC
-
-** Finding packages and setup of use-package
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-(require 'package)
-(setq package-check-signature 'nil)  ;; don't ask for signature files. I also don't know how to do this btw.
-
-;; (package-initialize)
-(setq package-archives (append package-archives
-			 '( ("melpa-stable" . "https://stable.melpa.org/packages/")
-			    ("melpa" . "http://melpa.org/packages/")
-			    ("gnu" . "http://elpa.gnu.org/packages/")
-			    ("elpy" . "http://jorgenschaefer.github.io/packages/"))) )
-
-(package-initialize)
-
-;; Bootstrap `use-package'
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-(setq custom-file "~/.emacs.d/custom.el")
-(load custom-file)
-
-;; Enable use-package
-(eval-when-compile
-  (require 'use-package))
-#+end_src
-
-=(package-initialize)= turns out to be necessary.
-
-
-** General emacs config
-
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
 (use-package emacs
   :config
   (setq ;; ring-bell-function 'ignore       ; no sound
@@ -113,15 +66,156 @@ I'll  define all of the src blocks with  a =:tangle yes= header so that I can ex
 
 =ibuffer= opens a buffer with a nice overview of all open buffers.
 
+* Which keys
 
-** Org mode 
+After typing the beginning of a keychord, like C-c, this package opens, after a second or so, the modeline with an overview of all possible keychords that have that particular combination as a start.
+I don't know whether I find this useful.
+
+#+begin_src emacs-lisp 
+(use-package which-key
+  :ensure t
+  :config
+(which-key-mode))
+#+end_src
+
+* Uniquify
+
+Put a dir-name behind a file name when files have the same name. 
+
+#+begin_src emacs-lisp 
+(use-package uniquify
+  :config
+  (setq uniquify-buffer-name-style 'post-forward-angle-brackets) )
+#+end_src
+
+* Some further general settings
+
+#+begin_src emacs-lisp 
+(use-package ediff
+  ; side by side differences rather than in two buffers under neath each other.
+  :ensure nil
+  :defer t
+  :config (setq ediff-split-window-function 'split-window-horizontally
+		ediff-window-setup-function 'ediff-setup-windows-plain ;; otherwise ediff opens another window
+		)
+  )
+
+
+(use-package files 
+  :ensure nil
+  :defer t
+  :config
+  (setq confirm-kill-processes nil;  "Just kill, do not ask for confirmation
+        make-backup-files nil ;; My copies are on dropbox and github
+        )
+  ) 
+
+;; a convenient interface to your recently and most frequently used commands.
+(use-package smex
+  :ensure t
+  :defer t
+  :bind (("M-x" . smex))
+  :config (smex-initialize)
+)
+#+end_src
+
+* dired
+
+When browsing through the directories, I want the intermediate buffers that dired opens killed.
+
+#+begin_src emacs-lisp 
+(use-package dired
+  :config
+  (setq delete-by-moving-to-trash t)
+  ;; Delete intermediate buffers when navigating through dired.
+  (eval-after-load "dired"
+    #'(lambda ()
+        (put 'dired-find-alternate-file 'disabled nil)
+        (define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file))))
+#+end_src
+
+* Snippets
+
+#+begin_src emacs-lisp 
+(use-package yasnippet
+  :ensure t
+  :defer t
+  :config
+  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+  (yas-global-mode 1))
+#+end_src
+
+BTW, after adding or changing a snippet's definition, run:
+#+BEGIN_SRC emacs-lisp :tangle no
+(yas-reload-all)
+#+END_SRC
+
+
+=cdlatex= may be practical to use in org-mode.
+But for the moment (20200719), I use =auctex=, and I'll try =yasnippets=; if this will be not work to my satisfaction, I might perhaps change to =cdlatex=.
+In that case, do not forget to switch on the hook when org-mode is loaded. 
+
+* ido
+
+=ido= provides auto completion to find files and open buffers.
+It also hides lots of files I typically don't want to see when searching for/opening files from a directory.
+
+#+begin_src emacs-lisp 
+(use-package ido
+  :defer t
+  :config
+  (setq ido-everywhere t
+	ido-enable-flex-matching t ;; show any name that has the typed characters
+	ido-use-virtual-buffers t  ;; list of past visited files
+	ido-create-new-buffer 'always  ;; do not ask to create new buffer when C-x b
+	confirm-nonexistent-file-or-buffer nil  ;; also do not ask to confirm in case of C-x b
+	ido-default-buffer-method 'selected-window
+	ido-file-extensions-order '(".tex" ".py")
+	completion-ignored-extensions '(".o" ".pdf" "~" ".bin" ".ilg" ".idx" ".ind" ".log"
+                                      ".obj" ".map" ".a" ".so" ".pytxcode" ".toc" ".rel" ".out" 
+                                      ".mod" ".aux" ".out" ".pyg")
+	ido-ignore-extensions t  ;; ignore files with the above extensions
+	ido-ignore-directories '("auto" "_minted*" "__pycache__" ".git") ;; this works with C-x d, but not with C-x C-f
+	ido-ignore-files '("auto" "_minted*" "__pycache__") ;; this works with C-x C-f
+	)
+  (ido-mode t) )
+#+end_src
+
+I don't think I'll need ivy or helm for my purposes.
+
+* Theming
+
+#+begin_src emacs-lisp 
+(use-package material-theme
+  :ensure t
+  )
+
+(use-package dimmer  ;; This dimms the buffer(s) that don't have point. 
+  :ensure t
+  :config (dimmer-mode t)
+  (setq dimmer-fraction 0.2)
+  )
+
+(use-package paren   ;; shows matching parentheses in  text
+  :ensure t
+  :init (setq show-paren-delay 0)
+  :config (show-paren-mode +1)
+  )
+
+(use-package elec-pair  ;; when typing make matching pair of e.g. brackets
+  :ensure nil
+  :hook (prog-mode . electric-pair-mode)
+  )
+#+end_src
+
+* Org mode 
 
 I commented out =org-structure-template-alist= because I use =yasnippets= rather then =<p TAB= to get a python source code block.
 
 I commented out several header settings for =org-babel= code blocks.
 I think I prefer to have these options set per file, not here. 
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
 (use-package org
   :config
   (org-babel-do-load-languages
@@ -158,178 +252,77 @@ I think I prefer to have these options set per file, not here.
 #+end_src
 
 
-
 Make nice bullets when viewing =.org= files
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp 
 (use-package org-bullets
-:ensure t
-:config
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  :ensure t
+  ; :config
+  ; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  :hook(org-mode . org-bullets-mode) )
 #+end_src
 
-
-** Enable simple export to github markdown
-#+begin_src emacs-lisp :tangle yes
+Enable simple export to github markdown.
+#+begin_src emacs-lisp 
 (use-package ox-gfm
   :ensure t
   )
 #+end_src
 
-** Snippets
 
-#+begin_src emacs-lisp :tangle yes
-(use-package yasnippet
-  :ensure t
-  :config
-  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
-  (yas-global-mode 1))
-#+end_src
-
-BTW, after adding or changing a snippet's definition, run:
-#+BEGIN_SRC emacs-lisp
-(yas-reload-all)
-#+END_SRC
-
-
-=cdlatex= may be practical to use in org-mode.
-But for the moment (20200719), I use =auctex=, and I'll try =yasnippets=; if this will be not work to my satisfaction, I might perhaps change to =cdlatex=.
-In that case, do not forget to switch on the hook when org-mode is loaded. 
-
-#+begin_src emacs-lisp :tangle yes
-;; (use-package cdlatex
+;; I dont use markdown anymore, but moved to org-mode.
+;;  If necessary, call pandoc to convert to markdown.
+;; (use-package markdown-mode
 ;;   :ensure t
-;;   )
-#+end_src
+;;   :commands (markdown-mode gfm-mode)
+;;   :mode (("README\\.md\\'" .
+;;   gfm-mode)
+;;          ("\\.md\\'" .
+;; 	 markdown-mode)
+;;          ("\\.markdown\\'" .
+;; 	 markdown-mode))
+;;   :init (setq markdown-command "multimarkdown")
+;; )
 
-** Which keys
+* Diminish
 
-After typing the beginning of a keychord, like C-c, this package opens, after a second or so, the modeline with an overview of all possible keychords that have that particular combination as a start.
-I don't know whether I find this useful.
-
-#+begin_src emacs-lisp :tangle yes
-(use-package which-key
-:ensure t
-:config
-(which-key-mode))
-#+end_src
-
-
-** Uniquify
-
-Put a dir-name behind a file name when files have the same name. 
-
-#+begin_src emacs-lisp :tangle yes
-(use-package uniquify
-  :config
-  (setq uniquify-buffer-name-style 'post-forward-angle-brackets) )
-#+end_src
-
-** dired
-
-When browsing through the directories, I want the intermediate buffers that dired opens killed.
-
-
-#+begin_src emacs-lisp :tangle yes
-(use-package dired
-  :config
-  (setq delete-by-moving-to-trash t)
-  ;; Delete intermediate buffers when navigating through dired.
-  (eval-after-load "dired"
-    #'(lambda ()
-        (put 'dired-find-alternate-file 'disabled nil)
-        (define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file))))
-#+end_src
-
-
-
-** ido
-
-=ido= provides auto completion to find files and open buffers.
-It also hides lots of files I typically don't want to see when searching for/opening files from a directory.
-
-#+begin_src emacs-lisp :tangle yes
-(use-package ido
-  :config
-  (setq ido-everywhere t
-	ido-enable-flex-matching t ;; show any name that has the typed characters
-	ido-use-virtual-buffers t  ;; list of past visited files
-	ido-create-new-buffer 'always  ;; do not ask to create new buffer when C-x b
-	confirm-nonexistent-file-or-buffer nil  ;; also do not ask to confirm in case of C-x b
-	ido-default-buffer-method 'selected-window
-	ido-file-extensions-order '(".tex" ".py")
-	completion-ignored-extensions '(".o" ".pdf" "~" ".bin" ".ilg" ".idx" ".ind" ".log"
-                                      ".obj" ".map" ".a" ".so" ".pytxcode" ".toc" ".rel" ".out" 
-                                      ".mod" ".aux" ".out" ".pyg")
-	ido-ignore-extensions t  ;; ignore files with the above extensions
-	ido-ignore-directories '("auto" "_minted*" "__pycache__" ".git") ;; this works with C-x d, but not with C-x C-f
-	ido-ignore-files '("auto" "_minted*" "__pycache__") ;; this works with C-x C-f
-	)
-  (ido-mode t) )
-#+end_src
-
-** The rest
-
-
-#+begin_src emacs-lisp :tangle yes
-
-(use-package material-theme
+#+begin_src emacs-lisp 
+(use-package diminish 
   :ensure t
   )
+#+end_src
 
-(use-package diminish ;; suppress minor modes, but I don't seem to see the effect of it.
-  :ensure t
-  )
+Seems to suppress minor modes in the modeline, but I guess I don't to see the effect of it.
 
+* Searching
+
+#+begin_src emacs-lisp 
 (use-package ack ;; practical searching
   :ensure t
   )
+#+end_src
 
-(use-package dimmer  ;; This dimms the buffer(s) that don't have point. 
+* Taking notes
+
+#+begin_src emacs-lisp 
+(use-package deft  ;; very practical note taking package
   :ensure t
-  :config (dimmer-mode t)
-  (setq dimmer-fraction 0.2)
-  )
-
-(use-package paren
-  :ensure nil
-  :init (setq show-paren-delay 0)
-  :config (show-paren-mode +1)
-  )
-
-
-(use-package ediff
-  ; side by side differences rather than in two buffers under neath each other.
-  :ensure nil
-  :config (setq ediff-split-window-function 'split-window-horizontally
-		ediff-window-setup-function 'ediff-setup-windows-plain ;; otherwise ediff opens another window
-		)
-  )
-
-
-(use-package elec-pair  ;; make matching pair of e.g. brackets
-  :ensure nil
-  :hook (prog-mode . electric-pair-mode)
-  )
-
-(use-package files 
-  :ensure nil
+  :defer t
+  :bind ("C-c d" . deft)
   :config
-  (setq confirm-kill-processes nil;  "Just kill, do not aske for confirmation
-        make-backup-files nil ;; My copies are on dropbox and github
-        )
-  ) 
+  (setq deft-extensions '("txt" "tex" "org"))
+  (setq deft-directory "~/org/deft")
+  (setq deft-auto-save-interval 0)
+  )
+#+end_src
 
-;; a convenient interface to your recently and most frequently used commands.
-(use-package smex
-  :ensure t
-  :bind (("M-x" . smex))
-  :config (smex-initialize)
-)
+* The rest
+
+#+begin_src emacs-lisp 
+
 
 ;; Company is a text completion framework for Emacs. The name stands for "complete anything". 
 (use-package company
   :ensure t
-  :defer t
   :bind (:map company-active-map
               ("C-n" . company-select-next)
               ("C-p" . company-select-previous)
@@ -347,7 +340,6 @@ It also hides lots of files I typically don't want to see when searching for/ope
 
 (use-package flyspell
   :ensure t
-  :defer t
   :init  (flyspell-mode 1)
   :config
   ;;   (setq 
@@ -359,22 +351,18 @@ It also hides lots of files I typically don't want to see when searching for/ope
         (text-mode . flyspell-mode)
         )
   )
+#+end_src
 
-(use-package deft  ;; very practical note taking package
-  :ensure t
-  :defer
-  :bind ("C-c d" . deft)
-  :config
-  (setq deft-extensions '("txt" "tex" "org"))
-  (setq deft-directory "~/org/deft")
-  (setq deft-auto-save-interval 0)
-  )
+* Python things
+
+#+begin_src emacs-lisp 
 
 ;; ensure to have run pip install jedi flake8
 ;; Some people say the following is also necessary, but I skipped them : pip install importmagic autopep8 yapf
 (use-package elpy
   :ensure t
   :after python
+  :defer t
   :config
   (remove-hook 'elpy-modules 'elpy-module-flymake)
   (elpy-enable)
@@ -390,8 +378,11 @@ It also hides lots of files I typically don't want to see when searching for/ope
         )
   :hook(python-mode . blacken-mode)   ;; autoformat with black on save
   )
+#+end_src
 
+* Latex
 
+#+begin_src emacs-lisp 
 (use-package latex; tex-site ;; If I don't use latex here, the add-to-list below does not work
   :ensure auctex
   :defer t
@@ -493,31 +484,24 @@ It also hides lots of files I typically don't want to see when searching for/ope
         )
   )
 
-;; I dont use markdown anymore, but moved to org-mode.
-;;  If necessary, call pandoc to convert to markdown.
-;; (use-package markdown-mode
-;;   :ensure t
-;;   :commands (markdown-mode gfm-mode)
-;;   :mode (("README\\.md\\'" .
-;;   gfm-mode)
-;;          ("\\.md\\'" .
-;; 	 markdown-mode)
-;;          ("\\.markdown\\'" .
-;; 	 markdown-mode))
-;;   :init (setq markdown-command "multimarkdown")
-;; )
+#+end_src
 
-
+* csv
+#+begin_src emacs-lisp 
 (use-package csv-mode
-    :ensure t
-    :mode ("\\.[Cc][Ss][Vv]\\'" . csv-mode)
-    :config (setq csv-separators '("," ";" "|" " "))
-    )
+  :ensure t
+  :defer t
+  :mode ("\\.[Cc][Ss][Vv]\\'" . csv-mode)
+  :config (setq csv-separators '("," ";" "|" " ")))
+#+end_src
 
+* github
+
+#+begin_src emacs-lisp 
 (use-package magit
   :ensure t
+  :defer t
   :bind (("C-x g" . magit-status))
   )
-
-
 #+end_src
+

@@ -42,6 +42,7 @@ When you don't know, or forgot, what a function does, put the point on the funct
   (horizontal-scroll-bar-mode -1)
   (global-linum-mode t)               ;; enable line numbers globally
   (global-hl-line-mode t)             ;; highlight the line with point
+  (global-visual-line-mode t)    
   (column-number-mode t)
   (fset 'yes-or-no-p 'y-or-n-p)       ;; Change all yes/no questions to y/n type
   (save-place-mode 1)                 ;; save last visited place of buffer
@@ -139,7 +140,6 @@ When browsing through the directories, I want the intermediate buffers that dire
 #+begin_src emacs-lisp 
 (use-package yasnippet
   :ensure t
-  :defer t
   :config
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
   (yas-global-mode 1))
@@ -229,9 +229,12 @@ I think I prefer to have these options set per file, not here.
   ;;              '("p" . "src python ")
   ;;              )
   (setq org-confirm-babel-evaluate nil  ; Don't ask to execute when I press C-c C-c
-	org-latex-pdf-process "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+	org-latex-pdf-process 
+	'("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+	"pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
 	org-src-preserve-indentation t
-	org-src-fontify-natively t )  ; does this work? 
+	org-src-fontify-natively t ; does this work? 
+	org-latex-with-hyperref nil)  
   ;; (setq org-babel-default-header-args:python
   ;;     '((:results . "output replace")
   ;; 	(:session . "none")
@@ -250,6 +253,31 @@ I think I prefer to have these options set per file, not here.
   ;; :hook (org-mode . turn-on-org-cdlatex)
   )
 #+end_src
+
+Often I use the (very handy) \LaTeX\/ =subfiles=package. The next allows to export (=C-c C-o l l=) to a =\documentclass{subfile}=.
+I want to be able to export to the a subfiles package
+
+#+begin_src emacs-lisp 
+(require 'ox-latex)
+(with-eval-after-load 'ox-latex
+   (add-to-list 'org-latex-classes
+   '("subfiles"
+   "\\documentclass{subfiles}
+   [NO-DEFAULT-PACKAGES]
+   [NO-PACKAGES]"
+   ("\\section{%s}" . "\\section*{%s}")
+   ("\\subsection{%s}" . "\\subsection*{%s}")
+   ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+
+#+end_src
+
+
+# ‘LATEX_CLASS_OPTIONS’
+# (setq org-latex-pdf-process
+#       '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+#     "bibtex %b"
+#     "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+#     "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 
 
 Make nice bullets when viewing =.org= files
@@ -301,7 +329,7 @@ Seems to suppress minor modes in the modeline, but I guess I don't to see the ef
   )
 #+end_src
 
-* Taking notes
+* Deft: Taking notes
 
 #+begin_src emacs-lisp 
 (use-package deft  ;; very practical note taking package
@@ -315,29 +343,46 @@ Seems to suppress minor modes in the modeline, but I guess I don't to see the ef
   )
 #+end_src
 
-* The rest
+* Autocompletion
 
 #+begin_src emacs-lisp 
-
-
-;; Company is a text completion framework for Emacs. The name stands for "complete anything". 
-(use-package company
+(use-package auto-complete
   :ensure t
-  :bind (:map company-active-map
-              ("C-n" . company-select-next)
-              ("C-p" . company-select-previous)
-              )
-  :config
-  (setq company-idle-delay 0.0)
-  (global-company-mode t)
-  )
+  :init
+  (progn
+    (ac-config-default)
+    (global-auto-complete-mode t)
+    ))
+#+end_src
+
+# #+begin_src emacs-lisp 
+# ;; Company is a text completion framework for Emacs. The name stands for "complete anything". 
+# (use-package company
+#   :ensure t
+#   :bind (:map company-active-map
+#               ("C-n" . company-select-next)
+#               ("C-p" . company-select-previous)
+#               )
+#   :config
+#   (setq company-idle-delay 0.0)
+#   (global-company-mode t)
+#   )
+# #+end_src
 
 
+
+* Syntax checking
+
+
+#+begin_src emacs-lisp 
 (use-package flycheck
   :ensure t
-  :init (global-flycheck-mode)
-  )
+  :init (global-flycheck-mode) )
+#+end_src
 
+* Spell checking
+
+#+begin_src emacs-lisp 
 (use-package flyspell
   :ensure t
   :init  (flyspell-mode 1)
@@ -355,19 +400,22 @@ Seems to suppress minor modes in the modeline, but I guess I don't to see the ef
 
 * Python things
 
-#+begin_src emacs-lisp 
+Ensure to run pip install jedi flake8
 
-;; ensure to have run pip install jedi flake8
+#+begin_src emacs-lisp 
 ;; Some people say the following is also necessary, but I skipped them : pip install importmagic autopep8 yapf
 (use-package elpy
   :ensure t
   :after python
-  :defer t
   :config
   (remove-hook 'elpy-modules 'elpy-module-flymake)
   (elpy-enable)
   )
+#+end_src
 
+
+
+#+begin_src emacs-lisp 
 (use-package blacken
   :ensure t
   :demand t
@@ -379,6 +427,20 @@ Seems to suppress minor modes in the modeline, but I guess I don't to see the ef
   :hook(python-mode . blacken-mode)   ;; autoformat with black on save
   )
 #+end_src
+
+
+Since I load elpy I don't think it is necessary to explicitly load jedi.
+#+begin_src emacs-lisp 
+;; (use-package epc
+;;   :ensure t)
+
+;; (use-package jedi
+;;   :ensure t
+;;   :init
+;;   (add-hook 'python-mode-hook 'jedi:setup)
+;;   (add-hook 'python-mode-hook 'jedi:ac-setup))
+#+end_src
+
 
 * Latex
 

@@ -10,4 +10,9 @@
 (package-refresh-contents)
 (package-install 'use-package))
 
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
+
 (org-babel-load-file (expand-file-name "~/.emacs.d/myinit.org"))
+
+

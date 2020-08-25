@@ -6,7 +6,8 @@
  '(org-agenda-files (quote ("~/python/misc/pyeda/puzzle.org")))
  '(package-selected-packages
    (quote
-    (org-bullets which-key ox-gfm  texmathp org magit csv-mode auctex blacken deft flycheck company smex dimmer ack diminish material-theme use-package))))
+    (ob-async dired files uniquify elpy auto-complete yasnippet rg atomic-chrome org-bullets which-key ox-gfm texmathp org magit csv-mode auctex blacken deft flycheck company smex dimmer ack diminish material-theme use-package)))
+ '(safe-local-variable-values (quote ((TeX-master . t)))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

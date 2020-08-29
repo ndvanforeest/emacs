@@ -3,6 +3,11 @@
 (add-to-list 'package-archives
    '("melpa" . "https://melpa.org/packages/")
    '("elpy" . "http://jorgenschaefer.github.io/packages/"))
+
+;; This is needed by nikola to render code nicely
+(add-to-list 'package-archives
+   '("htmlize" . "https://github.com/hniksic/emacs-htmlize"))
+
 (package-initialize)
 
 ;; Bootstrap `use-package'

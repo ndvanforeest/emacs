@@ -74,6 +74,7 @@ When you don't know, or forgot, what a function does, put the point on the funct
 
 =ibuffer= opens a buffer with a nice overview of all open buffers.
 
+
 * Some miscellaneous stuff
 
 When exporting an org mode file to LaTeX and pdf, the tex file is modified.
@@ -556,5 +557,14 @@ Since I load elpy I don't think it is necessary to explicitly load jedi.
   :defer t
   :bind (("C-x g" . magit-status))
   )
+#+end_src
+
+
+* htmlize
+
+This is used by =nikola= to render code blocks nicely in a pages and posts. 
+
+#+begin_src emacs-lisp 
+(use-package htmlize)
 #+end_src
 

@@ -65,7 +65,7 @@ When you don't know, or forgot, what a function does, put the point on the funct
   ;;   )
   :bind (
          ("M-/" . hippie-expand)  ;; useful, at least in python mode to autocomplete filenames in open("..")
-         ("C-X C-b" . ibuffer) 
+         ; ("C-x C-b" . ibuffer) 
          ("M-o" . other-window)  ;; quicker than C-x o
 	 ("M-z" . zap-up-to-char)
          )
@@ -73,6 +73,16 @@ When you don't know, or forgot, what a function does, put the point on the funct
 #+end_src
 
 =ibuffer= opens a buffer with a nice overview of all open buffers.
+
+* Bufler
+
+Replacement for =ibuffer=. See https://github.com/alphapapa/bufler.el
+
+#+begin_src emacs-lisp 
+(use-package bufler 
+  :bind (("C-x C-b" . bufler)))
+
+#+end_src
 
 
 * Some miscellaneous stuff
@@ -170,7 +180,6 @@ It also hides lots of files I typically don't want to see when searching for/ope
 
 #+begin_src emacs-lisp 
 (use-package ido
-  :defer t
   :config
   (setq ido-everywhere t
 	ido-enable-flex-matching t ;; show any name that has the typed characters
@@ -181,7 +190,7 @@ It also hides lots of files I typically don't want to see when searching for/ope
 	ido-file-extensions-order '(".tex" ".py")
 	completion-ignored-extensions '(".o" ".pdf" "~" ".bin" ".ilg" ".idx" ".ind" ".log"
                                       ".obj" ".map" ".a" ".so" ".pytxcode" ".toc" ".rel" ".out" 
-                                      ".mod" ".aux" ".out" ".pyg")
+                                      ".mod" ".aux" ".out" ".pyg" ".bbl" ".blg")
 	ido-ignore-extensions t  ;; ignore files with the above extensions
 	ido-ignore-directories '("auto" "_minted*" "__pycache__" ".git") ;; this works with C-x d, but not with C-x C-f
 	ido-ignore-files '("auto" "_minted*" "__pycache__") ;; this works with C-x C-f
@@ -331,7 +340,7 @@ I replaced =ack= for =rg=
 
 * Autocompletion
 
-#+begin_src emacs-lisp 
+# +begin_src emacs-lisp 
 (use-package auto-complete
   :init
   (progn
@@ -340,18 +349,21 @@ I replaced =ack= for =rg=
     ))
 #+end_src
 
-# #+begin_src emacs-lisp 
-# ;; Company is a text completion framework for Emacs. The name stands for "complete anything". 
-# (use-package company
-#   :bind (:map company-active-map
-#               ("C-n" . company-select-next)
-#               ("C-p" . company-select-previous)
-#               )
-#   :config
-#   (setq company-idle-delay 0.0)
-#   (global-company-mode t)
-#   )
-# #+end_src
+I don't really understand the difference between =auto-complete= and =company=. I have the impression that =company= works better with respect to completion. 
+
+
+Company stands for "complete anything". 
+#+begin_src emacs-lisp 
+(use-package company
+  :bind (:map company-active-map
+              ("C-n" . company-select-next)
+              ("C-p" . company-select-previous)
+              )
+  :config
+  (setq company-idle-delay 0.0)
+  (global-company-mode t)
+  )
+#+end_src
 
 
 * Atomic chrome
@@ -398,10 +410,13 @@ Set a shortcut like =M-e= in chromium by typing =chrome://extensions/shortcuts= 
 
 * Python things
 
-Ensure to run pip install jedi flake8
 
+I tried =eglot=, but I found it unbearably slow.  With =company= and =elpy= I have much better performance. 
+
+
+Ensure to run =pip install jedi flake8=.
+Some people say the following is also necessary =pip install importmagic autopep8 yapf=, but I skipped them
 #+begin_src emacs-lisp 
-;; Some people say the following is also necessary, but I skipped them : pip install importmagic autopep8 yapf
 (use-package elpy
   :after python
   :config
@@ -425,15 +440,7 @@ Ensure to run pip install jedi flake8
 #+end_src
 
 
-Since I load elpy I don't think it is necessary to explicitly load jedi.
-#+begin_src emacs-lisp 
-;; (use-package epc
-
-;; (use-package jedi
-;;   :init
-;;   (add-hook 'python-mode-hook 'jedi:setup)
-;;   (add-hook 'python-mode-hook 'jedi:ac-setup))
-#+end_src
+Since I load elpy I don't think it is necessary to explicitly load =jedi=.
 
 
 * Latex
@@ -541,6 +548,22 @@ Since I load elpy I don't think it is necessary to explicitly load jedi.
   )
 
 #+end_src
+
+
+*** Search and replace in latex environment
+    Usual regular expressions can be used, e.g. searching for \<i\> instead of just i avoids changing \sin to \sxn.
+
+#+begin_src emacs-lisp 
+(defun latex-replace-in-math ()
+"Call `query-replace-regexp' with `isearch-filter-predicate' set to filter out matches outside LaTeX math environments."
+(interactive)
+(let ((isearch-filter-predicate
+(lambda (BEG END)
+(save-excursion (save-match-data (goto-char BEG) (texmathp)))))
+(case-fold-search nil))
+(call-interactively 'query-replace-regexp)))
+#+end_src
+
 
 * csv
 #+begin_src emacs-lisp 

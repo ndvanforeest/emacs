@@ -70,9 +70,30 @@ When you don't know, or forgot, what a function does, put the point on the funct
 	 ("M-z" . zap-up-to-char)
          )
   :hook (before-save whitespace-cleanup) )
+
+
 #+end_src
 
 =ibuffer= opens a buffer with a nice overview of all open buffers.
+
+* The the
+
+#+begin_src emacs-lisp 
+(defun the-the ()
+       "Search forward for for a duplicated word."
+       (interactive)
+       (message "Searching for for duplicated words ...")
+       (push-mark)
+       ;; This regexp is not perfect
+       ;; but is fairly good over all:
+       (if (re-search-forward
+            "\\b\\([^@ \n\t]+\\)[ \n\t]+\\1\\b" nil 'move)
+           (message "Found duplicated word.")
+         (message "End of buffer")))
+     
+     ;; Bind 'the-the' to  C-c \
+     (global-set-key "\C-c\\" 'the-the)
+#+end_src
 
 * Bufler
 
@@ -83,8 +104,6 @@ Replacement for =ibuffer=. See https://github.com/alphapapa/bufler.el
   :bind (("C-x C-b" . bufler)))
 
 #+end_src
-
-
 * Some miscellaneous stuff
 
 When exporting an org mode file to LaTeX and pdf, the tex file is modified.
@@ -96,7 +115,6 @@ This is achieved with these settings.
 (global-auto-revert-mode 1) ;; you might not want this
 (setq auto-revert-verbose nil) ;; or this
 #+end_src
-
 
 * Which keys
 
@@ -141,7 +159,7 @@ Put a dir-name behind a file name when files have the same name.
 )
 #+end_src
 
-* COMMENT dired
+* dired
 
 When browsing through the directories, I want the intermediate buffers that dired opens killed.
 
@@ -265,6 +283,9 @@ I think I prefer to have these options set per file, not here.
   (setq org-latex-listings 'minted)
   ;; :hook (org-mode . turn-on-org-cdlatex)
   )
+
+; (setq org-babel-debug-input t)
+
 #+end_src
 
 Often I use the (very handy) LaTeX =subfiles=package. The next allows to export (=C-c C-e l l=) to a =\documentclass{subfile}=.
@@ -294,14 +315,6 @@ Make nice bullets when viewing =.org= files
 (use-package ob-async)
 #+end_src
 
-Enable simple export to github markdown.
-#+begin_src emacs-lisp 
-(use-package ox-gfm
-  )
-#+end_src
-
-
-I dont use markdown anymore, but moved to org-mode.  If necessary, call pandoc to convert to markdown.
 
 * Diminish
 
@@ -322,8 +335,6 @@ I replaced =ack= for =rg=
   (rg-enable-default-bindings)
   )
 #+end_src
-
-
 
 * Deft: Taking notes
 
@@ -364,7 +375,6 @@ Company stands for "complete anything".
   (global-company-mode t)
   )
 #+end_src
-
 
 * Atomic chrome
 Type emails and boxes within emacs
@@ -441,7 +451,6 @@ Some people say the following is also necessary =pip install importmagic autopep
 
 
 Since I load elpy I don't think it is necessary to explicitly load =jedi=.
-
 
 * Latex
 
@@ -549,21 +558,19 @@ Since I load elpy I don't think it is necessary to explicitly load =jedi=.
 
 #+end_src
 
-
-*** Search and replace in latex environment
+** Search and replace in latex environment
     Usual regular expressions can be used, e.g. searching for \<i\> instead of just i avoids changing \sin to \sxn.
 
 #+begin_src emacs-lisp 
 (defun latex-replace-in-math ()
-"Call `query-replace-regexp' with `isearch-filter-predicate' set to filter out matches outside LaTeX math environments."
-(interactive)
-(let ((isearch-filter-predicate
-(lambda (BEG END)
-(save-excursion (save-match-data (goto-char BEG) (texmathp)))))
-(case-fold-search nil))
-(call-interactively 'query-replace-regexp)))
+  "Call `query-replace-regexp' with `isearch-filter-predicate' set to filter out matches outside LaTeX math environments."
+  (interactive)
+  (let ((isearch-filter`-predicate
+	 (lambda (BEG END)
+	   (save-excursion (save-match-data (goto-char BEG) (texmathp)))))
+	(case-fold-search nil))
+    (call-interactively 'query-replace-regexp)))
 #+end_src
-
 
 * csv
 #+begin_src emacs-lisp 
@@ -581,7 +588,6 @@ Since I load elpy I don't think it is necessary to explicitly load =jedi=.
   :bind (("C-x g" . magit-status))
   )
 #+end_src
-
 
 * htmlize
 

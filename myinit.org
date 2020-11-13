@@ -179,6 +179,9 @@ When browsing through the directories, I want the intermediate buffers that dire
   :config
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
   (yas-global-mode 1))
+
+(use-package yasnippet-snippets)
+
 #+end_src
 
 BTW, after adding or changing a snippet's definition, run:
@@ -239,6 +242,15 @@ I don't think I'll need ivy or helm for my purposes.
   )
 #+end_src
 
+* Jupyter and ipython
+I don't know whether this is practical.
+
+#+begin_src emacs-lisp 
+; (use-package jupyter)
+; (use-package ob-ipython)
+
+#+end_src
+
 * Org mode 
 
 I commented out =org-structure-template-alist= because I use =yasnippets= rather then =<p TAB= to get a python source code block.
@@ -252,17 +264,21 @@ I think I prefer to have these options set per file, not here.
   (org-babel-do-load-languages
    'org-babel-load-languages  ; I hope I never need any other languages then these
    '((shell . t)
+     (ipython . t)
      (python . t)
      (emacs-lisp . t)
+     (jupyter . t) ;has to be last in the list
      )
    )
   ;; (add-to-list 'org-structure-template-alist
   ;;              '("p" . "src python ")
   ;;              )
-  (setq org-confirm-babel-evaluate nil  ; Don't ask to execute when I press C-c C-c
+  (setq org-confirm-babel-evaluate nil 
+        org-latex-listings 'minted
+	org-latex-packages-alist '(("" "minted"))
 	org-latex-pdf-process 
 	'("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-	"pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
+	 "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
 	org-src-preserve-indentation t
 	org-src-fontify-natively t ; does this work? 
 	org-latex-with-hyperref nil)  
@@ -280,10 +296,8 @@ I think I prefer to have these options set per file, not here.
   ;; 	(:hlines . "no")
   ;; 	(:tangle . "no")
   ;; 	(:eval . "never-export")))
-  (setq org-latex-listings 'minted)
-  ;; :hook (org-mode . turn-on-org-cdlatex)
+  :hook (org-mode . turn-on-org-cdlatex)
   )
-
 ; (setq org-babel-debug-input t)
 
 #+end_src
@@ -311,8 +325,10 @@ Make nice bullets when viewing =.org= files
   ; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
   :hook(org-mode . org-bullets-mode) )
 #+end_src
+
 #+begin_src emacs-lisp 
 (use-package ob-async)
+
 #+end_src
 
 
@@ -424,9 +440,15 @@ Set a shortcut like =M-e= in chromium by typing =chrome://extensions/shortcuts= 
 I tried =eglot=, but I found it unbearably slow.  With =company= and =elpy= I have much better performance. 
 
 
+
+
 Ensure to run =pip install jedi flake8=.
 Some people say the following is also necessary =pip install importmagic autopep8 yapf=, but I skipped them
 #+begin_src emacs-lisp 
+(setq python-indent-guess-indent-offset t)  
+(setq python-indent-guess-indent-offset-verbose nil)
+
+
 (use-package elpy
   :after python
   :config
@@ -499,10 +521,11 @@ Since I load elpy I don't think it is necessary to explicitly load =jedi=.
     )
   (add-hook 'LaTeX-mode-hook
             (lambda ()
-              (visual-line-mode) ; hiermee kan een zin over meerdere regels lopen, zonder dat ie wordt opgehakt.
-              (turn-on-reftex); load reftex
-              (LaTeX-math-mode) ; enable math-mode right away in  math environment; `a expands right away to \alpha
-	      (electric-indent-local-mode -1)
+	    (turn-on-reftex)
+	    (turn-on-cdlatex) 
+              ; (visual-line-mode) ; Since I load this globally, it is not necessary I think. 
+              ; (LaTeX-math-mode) ; enable math-mode right away in  math environment; `a expands right away to \alpha
+  	      (electric-indent-local-mode -1) ; this does not seem to help to no indent in an environment.
               (LaTeX-add-environments
                '("axiom" LaTeX-env-label)
                '("corollary" LaTeX-env-label)
@@ -521,11 +544,12 @@ Since I load elpy I don't think it is necessary to explicitly load =jedi=.
               )
             )
   (add-to-list 'LaTeX-verbatim-environments "exercise" "solution")
-  (add-to-list 'LaTeX-indent-environment-list
-	       '("exercise" current-indentation)
-               '("solution" current-indentation)
-	       )
+  ;; (add-to-list 'LaTeX-indent-environment-list
+  ;; 	       '("exercise" current-indentation)
+  ;;              '("solution" current-indentation)
+  ;; 	       )
   )
+
 
 (use-package reftex
   :defer t
@@ -555,6 +579,8 @@ Since I load elpy I don't think it is necessary to explicitly load =jedi=.
           )
         )
   )
+
+(use-package cdlatex)
 
 #+end_src
 

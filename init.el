@@ -4,6 +4,9 @@
    '("melpa" . "https://melpa.org/packages/")
    '("elpy" . "http://jorgenschaefer.github.io/packages/"))
 
+
+(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+
 ;; This is needed by nikola to render code nicely
 (add-to-list 'package-archives
    '("htmlize" . "https://github.com/hniksic/emacs-htmlize"))
@@ -52,7 +55,6 @@ BUFFER may be either a buffer or its name (a string)."
 (global-set-key (kbd "C-x k") 'kill-buffer-and-its-windows)
 ; (global-set-key (kbd "C-x w") 'delete-frame)
 ; (substitute-key-definition 'kill-buffer 'kill-buffer-and-its-windows global-map)
-
 
 (org-babel-load-file (expand-file-name "~/.emacs.d/myinit.org"))
 

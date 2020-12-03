@@ -6,6 +6,7 @@
 
 
 (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+;; (add-to-list 'package-archives '("org" . "https://stable.melpa.org/elpa/") t)
 
 ;; This is needed by nikola to render code nicely
 (add-to-list 'package-archives

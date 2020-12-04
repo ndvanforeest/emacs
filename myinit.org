@@ -391,33 +391,6 @@ I replaced =ack= for =rg=
   )
 #+end_src
 
-* Autocompletion
-
-# #+begin_src emacs-lisp 
-# (use-package auto-complete
-#   :init
-#   (progn
-#     (ac-config-default)
-#     (global-auto-complete-mode t)
-#     ))
-# #+end_src
-
-I don't really understand the difference between =auto-complete= and =company=. I have the impression that =company= works better with respect to completion. 
-
-
-Company stands for "complete anything". 
-# #+begin_src emacs-lisp 
-# (use-package company
-#   :bind (:map company-active-map
-#               ("C-n" . company-select-next)
-#               ("C-p" . company-select-previous)
-#               )
-#   :config
-#   (setq company-idle-delay 0.0)
-#   (global-company-mode t)
-#   )
-# #+end_src
-
 * Atomic chrome
 Type emails and boxes within emacs
 
@@ -460,6 +433,33 @@ Set a shortcut like =M-e= in chromium by typing =chrome://extensions/shortcuts= 
   )
 #+end_src
 
+* Autocompletion
+
+# #+begin_src emacs-lisp 
+# (use-package auto-complete
+#   :init
+#   (progn
+#     (ac-config-default)
+#     (global-auto-complete-mode t)
+#     ))
+# #+end_src
+
+I don't really understand the difference between =auto-complete= and =company=. I have the impression that =company= works better with respect to completion. 
+
+
+Company stands for "complete anything". 
+#+begin_src emacs-lisp 
+(use-package company
+  :bind (:map company-active-map
+              ("C-n" . company-select-next)
+              ("C-p" . company-select-previous)
+              )
+  :config
+  (setq company-idle-delay 0.0)
+  (global-company-mode t)
+  )
+#+end_src
+
 * Python things
 
 
@@ -470,83 +470,47 @@ I tried =eglot=, but I found it unbearably slow.  With =company= and =elpy= I ha
 
 Ensure to run =pip install jedi flake8=.
 Some people say the following is also necessary =pip install importmagic autopep8 yapf=, but I skipped them
+# #+begin_src emacs-lisp 
+# (use-package lsp-mode
+#   :config
+#   (setq lsp-highlight-symbol-at-point nil)
+#   (lsp-register-custom-settings
+#    '(("pyls.plugins.pyls_black.enabled" t t)))
+#   :hook (python-mode . lsp))
+
+# (use-package lsp-ui
+#   :commands lsp-ui-mode)
+# #+end_src
+
+
 #+begin_src emacs-lisp 
-;; (use-package eglot)
-;; ; (add-hook python-mode-hook 'eglot-ensure)
-
-;; (use-package lsp-python-ms
-;;   :ensure t
-;;   :init (setq lsp-python-ms-auto-install-server t)
-;;   :hook (python-mode . (lambda ()
-;;                           (require 'lsp-python-ms)
-;;                           (lsp))))  ; or lsp-deferred
-
-
-;; (use-package lsp-mode
-;;   :config
-;;   (lsp-register-custom-settings
-;;    '(;("pyls.plugins.pyls_mypy.enabled" t t)
-;;      ;("pyls.plugins.pyls_mypy.live_mode" nil t)
-;;      ("pyls.plugins.pyls_black.enabled" t t)
-;;      ;("pyls.plugins.pyls_isort.enabled" t t))
-;;      )
-;;   :hook
-;;   ((python-mode . lsp)))
-
-;; (use-package lsp-mode
-;;   :config 
-;;   (lsp-register-custom-settings
-;;    '(("pyls.plugins.pyls_black.enabled" t t)))
-;;   :hook
-;;   ((python-mode . lsp)))
-
-
-(use-package lsp-mode
-  :hook (python-mode . lsp)
+(use-package elpy
+  :after python
+  :custom (elpy-rpc-backend "jedi")
   :config
-  (setq lsp-highlight-symbol-at-point nil))
+  (remove-hook 'elpy-modules 'elpy-module-flymake)
+  (elpy-enable)
+  )
 
-(use-package lsp-ui
-  :commands lsp-ui-mode)
-
-;; (use-package company-lsp
-;;   :after lsp-mode
-;;   :config
-;;   (push 'company-lsp company-backends))
-
-; (use-package company-lsp)
+(use-package blacken
+  :demand t
+  :after python
+  :config
+  (setq blacken-skip-string-normalization t
+        blacken-line-length 90
+        )
+  :hook(python-mode . blacken-mode)   ;; autoformat with black on save
+  )
 #+end_src
-
-# #+begin_src emacs-lisp 
-# (setq python-indent-guess-indent-offset t)  
-# (setq python-indent-guess-indent-offset-verbose nil)
-
-
-# (use-package elpy
-#   :after python
-#   :custom (elpy-rpc-backend "jedi")
-#   :config
-#   (remove-hook 'elpy-modules 'elpy-module-flymake)
-#   (elpy-enable)
-#   )
-# #+end_src
-
-
-
-# #+begin_src emacs-lisp 
-# (use-package blacken
-#   :demand t
-#   :after python
-#   :config
-#   (setq blacken-skip-string-normalization t
-#         blacken-line-length 90
-#         )
-#   :hook(python-mode . blacken-mode)   ;; autoformat with black on save
-#   )
-# #+end_src
 
 
 Since I load elpy I don't think it is necessary to explicitly load =jedi=.
+
+
+#+begin_src emacs-lisp 
+(setq python-indent-guess-indent-offset t)  
+(setq python-indent-guess-indent-offset-verbose nil)
+#+end_src
 
 * Jupyter and ipython
 I don't know whether this is practical.

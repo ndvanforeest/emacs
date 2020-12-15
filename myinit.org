@@ -301,7 +301,12 @@ I think I prefer to have these options set per file, not here.
   :hook (org-mode . turn-on-org-cdlatex)
   )
 
+
+
 (setq org-cycle-emulate-tab 'white)
+
+;; scale the latex preview figure that you get with C-c C-x C-l
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 5.0))
 
 ;; (add-to-list 'org-latex-classes
 ;;              '("article"

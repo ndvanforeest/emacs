@@ -78,6 +78,9 @@ When you don't know, or forgot, what a function does, put the point on the funct
 
 * The the
 
+Search for occurrences of repetition of words, like "the the", "a a", and so on
+
+
 #+begin_src emacs-lisp 
 (defun the-the ()
        "Search forward for for a duplicated word."
@@ -228,7 +231,6 @@ For normal work I use the material theme.
 #+begin_src emacs-lisp 
 (use-package material-theme
   )
-
 #+end_src
 
 However, for youtube presentations a white background is clearer. For this I use the leuven-theme.
@@ -236,12 +238,20 @@ However, for youtube presentations a white background is clearer. For this I use
 ; (use-package leuven-theme  )
 #+end_src
 
+* Dimmer
+
+This dimms the buffer(s) that don't have point. 
+
 #+begin_src emacs-lisp 
-(use-package dimmer  ;; This dimms the buffer(s) that don't have point. 
+(use-package dimmer  
   :config (dimmer-mode t)
   (setq dimmer-fraction 0.2)
   )
+#+end_src
 
+* Parentheses
+
+#+begin_src emacs-lisp 
 (use-package paren   ;; shows matching parentheses in  text
   :init (setq show-paren-delay 0)
   :config (show-paren-mode +1)
@@ -250,6 +260,8 @@ However, for youtube presentations a white background is clearer. For this I use
 (use-package elec-pair  ;; when typing make matching pair of e.g. brackets
   :hook (prog-mode . electric-pair-mode)
   )
+
+(use-package rainbow-delimiters)
 #+end_src
 
 * Org mode 

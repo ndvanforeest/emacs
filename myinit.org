@@ -233,10 +233,6 @@ For normal work I use the material theme.
   )
 #+end_src
 
-However, for youtube presentations a white background is clearer. For this I use the leuven-theme.
-#+begin_src emacs-lisp 
-; (use-package leuven-theme  )
-#+end_src
 
 * Dimmer
 
@@ -261,7 +257,12 @@ This dimms the buffer(s) that don't have point.
   :hook (prog-mode . electric-pair-mode)
   )
 
-(use-package rainbow-delimiters)
+
+;; (use-package rainbow-delimiters
+;;   :hook((prog-mode . rainbow-delimiters-mode)
+;;         (text-mode . rainbow-delimiters-mode)
+;;         )
+;; )
 #+end_src
 
 * Org mode 
@@ -277,10 +278,8 @@ I think I prefer to have these options set per file, not here.
   (org-babel-do-load-languages
    'org-babel-load-languages  ; I hope I never need any other languages then these
    '((shell . t)
-     (ipython . t)
      (python . t)
      (emacs-lisp . t)
-     (jupyter . t) ;has to be last in the list
      )
    )
   ;; (add-to-list 'org-structure-template-alist
@@ -530,42 +529,21 @@ Since I load elpy I don't think it is necessary to explicitly load =jedi=.
 #+end_src
 
 * Jupyter and ipython
-I don't know whether this is practical.
+I don't use jupyter or ipyton, but org babel.
 
 #+begin_src emacs-lisp 
 ; (use-package jupyter)
 ; (use-package ob-ipython)
-
 #+end_src
 
 * Latex
 
-*** TODO I found this is in the manual of cdlatex. There seems to be a difference between LaTeX mode and latex mode. I have to sort this out.
+** Paragraph outlining
 
-(add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
-(add-hook 'latex-mode-hook 'turn-on-cdlatex)   ; with Emacs latex mode
-
+This function splits a paragraph with one sentence per line.  I find this layout much more convenient than  fixed width paragraphs.
 
 #+begin_src emacs-lisp 
-(use-package latex; tex-site ;; If I don't use latex here, the add-to-list below does not work
-  :ensure auctex
-  :defer t
-  :mode ("\\.tex\\'" . TeX-latex-mode)
-  :init
-  (setq reftex-plug-into-AUCTeX t )
-  :bind (("M-q" . ales/fill-paragraph))  ;; start every sentence on a new line
-  :config
-  ;; (setq-default TeX-master nil ); by each new fie AUCTEX will ask for a master fie.
-  (setq-default auto-fill-function nil) ;; 
-  (setq TeX-auto-save t
-        TeX-parse-self t
-        TeX-save-query nil  ;dont ask to save if you want to compile with C-c C-c
-        LaTeX-command-style '(("" "%(PDF)%(latex) -shell-escape %S%(PDFout)"))
-        TeX-file-extensions '("tex" "sty")
-        TeX-ispell-extend-skip-list t
-	reftex-isearch-minor-mode t ; search whole document, not just the current file
-        )
-  (defun ales/fill-paragraph (&optional P)
+  (defun ales/fill-paragraph (&optional P)	;
     "When called with prefix argument call `fill-paragraph'. Otherwise split the current paragraph into one sentence per line."
     (interactive "P")
     (if (not P)
@@ -589,69 +567,6 @@ I don't know whether this is practical.
       ;; otherwise do ordinary fill paragraph
       (fill-paragraph P))
     )
-  (add-hook 'LaTeX-mode-hook
-            (lambda ()
-	    (turn-on-reftex)
-	    (turn-on-cdlatex) 
-              ; (visual-line-mode) ; Since I load this globally, it is not necessary I think. 
-              ; (LaTeX-math-mode) ; enable math-mode right away in  math environment; `a expands right away to \alpha
-  	      (electric-indent-local-mode -1) ; this does not seem to help to no indent in an environment.
-              (LaTeX-add-environments
-               '("axiom" LaTeX-env-label)
-               '("corollary" LaTeX-env-label)
-               '("lemma" LaTeX-env-label)
-               '("proposition" LaTeX-env-label)
-               '("theorem" LaTeX-env-label)
-               '("exercise" LaTeX-env-label)
-               '("extra" LaTeX-env-label)
-               '("example" LaTeX-env-label)
-               '("remark" LaTeX-env-label)
-               ;; '("question" "point")
-               ;;'("questionText" "point")
-               '("slide" "title")
-               '("wideslide" "title")
-               )
-              )
-            )
-  (add-to-list 'LaTeX-verbatim-environments "exercise" "solution")
-  ;; (add-to-list 'LaTeX-indent-environment-list
-  ;; 	       '("exercise" current-indentation)
-  ;;              '("solution" current-indentation)
-  ;; 	       )
-  )
-
-
-(use-package reftex
-  :defer t
-  :config
-  (setq reftex-enable-partial-scans t
-        reftex-save-parse-info t
-        reftex-use-multiple-selection-buffers t
-        reftex-plug-into-AUCTeX t
-        reftex-cite-prompt-optional-args t; Prompt for empty optional arguments in cite
-        )
-  (setq reftex-label-alist
-        '(("axiom"   ?a "ax:"  "~\\ref{%s}" nil ("axiom"   "ax.") -2)
-          ("corollary" ?c "cor:" "~\\ref{%s}" nil   ("corollary" "co.") -3)
-          ("exercise" ?x "ex:" "~\\ref{%s}" nil   ("exercise" "ex.") -4)
-          ("extra" ?x "ex:" "~\\ref{%s}" nil   ("exercise" "ex.") -4)
-          ("lemma" ?l "lem:" "~\\ref{%s}" nil   ("lemma" "le.") -5)
-          ("proposition" ?p "prop:" "~\\ref{%s}" nil   ("proposition" "pr.") -6)
-          ("theorem" ?h "thr:" "~\\ref{%s}" nil   ("theorem" "th.") -7)
-          ("example" ?p "exa:" "~\\ref{%s}" nil   ("example" "exa.") -8)
-          ("remark" ?r "rem:" "~\\ref{%s}" nil   ("remark" "rem.") -9)
-          ("definition" ?d "def:" "~\\ref{%s}" nil   ("definition" "def.") -10)
-          )
-        )
-  (setq reftex-external-file-finders
-        '(("tex" . "kpsewhich -format=.tex %f")
-          ("bib" . "kpsewhich -format=.bbl %f")
-          )
-        )
-  )
-
-(use-package cdlatex)
-
 #+end_src
 
 ** Search and replace in latex environment
@@ -668,6 +583,108 @@ I don't know whether this is practical.
     (call-interactively 'query-replace-regexp)))
 #+end_src
 
+** Auctex
+
+Some people load ~tex-site~, rather than ~latex~. I found the following explanation on the web: 
+
+---
+I believe tex-site is right in your case since you use the git version of AUCTeX, which doesn't include this line:
+
+;;;###autoload (require 'tex-site)
+
+ELPA users shouldn't use tex-site since the file gets required during package initialization.
+---
+
+Since I use ELPA,  I stick to ~use-package latex~.
+
+#+begin_src emacs-lisp 
+(use-package latex; tex-site ;; If I don't use latex here, the add-to-list below does not work
+  :ensure auctex
+  :defer t
+  :mode ("\\.tex\\'" . latex-mode)
+  :init
+  (setq reftex-plug-into-AUCTeX t )
+  :bind (("M-q" . ales/fill-paragraph))  ;; start every sentence on a new line
+  :config
+  ;; (setq-default TeX-master nil ); by each new fie AUCTEX will ask for a master fie.
+  (setq-default auto-fill-function nil) ;; 
+  (setq TeX-auto-save t
+        TeX-parse-self t
+        TeX-save-query nil  ;dont ask to save if you want to compile with C-c C-c
+        LaTeX-command-style '(("" "%(PDF)%(latex) -shell-escape %S%(PDFout)"))
+        TeX-file-extensions '("tex" "sty")
+        TeX-ispell-extend-skip-list t
+	reftex-isearch-minor-mode t ; search whole document, not just the current file
+        )
+  (add-hook 'LaTeX-mode-hook
+            (lambda ()
+	    (turn-on-reftex)
+	    (turn-on-cdlatex) 
+              ; (visual-line-mode) ; Since I load this globally, it is not necessary I think. 
+              ; (LaTeX-math-mode) ; enable math-mode right away in  math environment; `a expands right away to \alpha
+  	      (electric-indent-local-mode -1) ; this does not seem to help to no indent in an environment.
+              (LaTeX-add-environments
+               '("corollary" LaTeX-env-label)
+               '("lemma" LaTeX-env-label)
+               '("proposition" LaTeX-env-label)
+               '("theorem" LaTeX-env-label)
+               '("exercise" LaTeX-env-label)
+               '("extra" LaTeX-env-label)
+               '("example" LaTeX-env-label)
+               '("remark" LaTeX-env-label)
+                  )
+              )
+            )
+  (add-to-list 'LaTeX-verbatim-environments "exercise" "solution")
+  ;; (add-to-list 'LaTeX-indent-environment-list
+  ;; 	       '("exercise" current-indentation)
+  ;;              '("solution" current-indentation)
+  ;; 	       )
+  )
+#+end_src
+
+** Reftex
+
+#+begin_src emacs-lisp 
+(use-package reftex
+  :defer t
+  :config
+  (setq reftex-enable-partial-scans t
+        reftex-save-parse-info t
+        reftex-use-multiple-selection-buffers t
+        reftex-plug-into-AUCTeX t
+        reftex-cite-prompt-optional-args t; Prompt for empty optional arguments in cite
+        )
+  (setq reftex-label-alist
+        '( ("corollary" ?c "cor:" "~\\ref{%s}" nil   ("corollary" "co.") -3)
+          ("exercise" ?x "ex:" "~\\ref{%s}" nil   ("exercise" "ex.") -4)
+          ("lemma" ?l "lem:" "~\\ref{%s}" nil   ("lemma" "le.") -5)
+          ("proposition" ?p "prop:" "~\\ref{%s}" nil   ("proposition" "pr.") -6)
+          ("theorem" ?h "thr:" "~\\ref{%s}" nil   ("theorem" "th.") -7)
+          ("example" ?p "exa:" "~\\ref{%s}" nil   ("example" "exa.") -8)
+          ("remark" ?r "rem:" "~\\ref{%s}" nil   ("remark" "rem.") -9)
+          ("definition" ?d "def:" "~\\ref{%s}" nil   ("definition" "def.") -10)
+          )
+        )
+  (setq reftex-external-file-finders
+        '(("tex" . "kpsewhich -format=.tex %f")
+          ("bib" . "kpsewhich -format=.bbl %f")
+          )
+        )
+  )
+
+
+#+end_src
+
+** CD latex
+
+#+begin_src emacs-lisp 
+(use-package cdlatex
+   :defer t
+)
+#+end_src
+
+
 * csv
 #+begin_src emacs-lisp 
 (use-package csv-mode
@@ -676,14 +693,16 @@ I don't know whether this is practical.
   :config (setq csv-separators '("," ";" "|" " ")))
 #+end_src
 
-* github
+* magit
 
-#+begin_src emacs-lisp 
-(use-package magit
-  :defer t
-  :bind (("C-x g" . magit-status))
-  )
-#+end_src
+I don't seem to use this.
+
+# #+begin_src emacs-lisp 
+# (use-package magit
+#   :defer t
+#   :bind (("C-x g" . magit-status))
+#   )
+# #+end_src
 
 * htmlize
 

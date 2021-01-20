@@ -177,14 +177,16 @@ When browsing through the directories, I want the intermediate buffers that dire
 
 * Snippets
 
+Weird, it seems that my ~.emacs.d/snippets~ directory is not added to the path.
+However, I then tried to make a new snippet ~M-x yas-new-snippet- and when saving emacs asked me where to save the file and it suggested the ~.emacs.d/snippets/org-mode~ dir. Once I saved the file in that directory, it got found after ~(yas-reload-all)~. I infered from this that I have to save the snippets in directories like ~org-mode~ or ~latex-mode~. And this worked indeed.
+
 #+begin_src emacs-lisp 
 (use-package yasnippet
-  :config
-  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+  :init
+;  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
   (yas-global-mode 1))
 
-(use-package yasnippet-snippets)
-
+; (use-package yasnippet-snippets)
 #+end_src
 
 BTW, after adding or changing a snippet's definition, run:
@@ -193,9 +195,6 @@ BTW, after adding or changing a snippet's definition, run:
 #+END_SRC
 
 
-=cdlatex= may be practical to use in org-mode.
-But for the moment (20200719), I use =auctex=, and I'll try =yasnippets=; if this will be not work to my satisfaction, I might perhaps change to =cdlatex=.
-In that case, do not forget to switch on the hook when org-mode is loaded. 
 
 * ido
 
@@ -618,11 +617,13 @@ Since I use ELPA,  I stick to ~use-package latex~.
         )
   (add-hook 'LaTeX-mode-hook
             (lambda ()
-	    (turn-on-reftex)
-	    (turn-on-cdlatex) 
+	      (turn-on-reftex)
+	      (turn-on-cdlatex) 
+              (prettify-symbols-mode)
               ; (visual-line-mode) ; Since I load this globally, it is not necessary I think. 
               ; (LaTeX-math-mode) ; enable math-mode right away in  math environment; `a expands right away to \alpha
   	      (electric-indent-local-mode -1) ; this does not seem to help to no indent in an environment.
+              (reftex-isearch-minor-mode)
               (LaTeX-add-environments
                '("corollary" LaTeX-env-label)
                '("lemma" LaTeX-env-label)
@@ -647,7 +648,8 @@ Since I use ELPA,  I stick to ~use-package latex~.
 
 #+begin_src emacs-lisp 
 (use-package reftex
-  :defer t
+  ; :defer t
+  :after latex
   :config
   (setq reftex-enable-partial-scans t
         reftex-save-parse-info t
@@ -655,6 +657,8 @@ Since I use ELPA,  I stick to ~use-package latex~.
         reftex-plug-into-AUCTeX t
         reftex-cite-prompt-optional-args t; Prompt for empty optional arguments in cite
         )
+  (setq reftex-keep-temporary-buffers nil);; added 20210114
+  (setq reftex-trust-label-prefix '("fig:" "eq:")) ;; added 20210114
   (setq reftex-label-alist
         '( ("corollary" ?c "cor:" "~\\ref{%s}" nil   ("corollary" "co.") -3)
           ("exercise" ?x "ex:" "~\\ref{%s}" nil   ("exercise" "ex.") -4)

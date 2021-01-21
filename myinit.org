@@ -8,35 +8,94 @@ When you don't know, or forgot, what a function does, put the point on the funct
 
 * General emacs config
 
+#+begin_src emacs-lisp
+(menu-bar-mode -1)  ;; I want to use as much screen as possible.
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(horizontal-scroll-bar-mode -1)
+#+end_src
+
+Number the lines and columns
+#+begin_src emacs-lisp 
+(global-linum-mode t)
+(column-number-mode t)
+#+end_src
+
+Change all yes/no questions to y/n type
+#+begin_src emacs-lisp 
+(fset 'yes-or-no-p 'y-or-n-p) 
+#+end_src
+
+Save last visited place of buffer. Very convenient.
+#+begin_src emacs-lisp 
+(save-place-mode 1)                 
+#+end_src
+
+Kill the whole line, rather than leaving the newline behind.
+
+#+begin_src emacs-lisp 
+(setq  kill-whole-line 'always)
+#+end_src
+
+Highlight the line with point. 
+#+begin_src emacs-lisp 
+(global-hl-line-mode t)       
+#+end_src
+
+Visual Line mode provides support for editing by visual lines.
+It turns on word-wrapping in the current buffer, and rebinds C-a, C-e, and C-k to commands that operate by visual lines instead of logical lines.
+#+begin_src emacs-lisp 
+(global-visual-line-mode t)    
+#+end_src
+
+Don't insert returns in long lines.
+#+begin_src emacs-lisp 
+(setq auto-fill-mode -1)
+#+end_src
 
 
+I don't care to see the welcome anymore, even though it was very useful 22 years ago when I started to use emacs.
+#+begin_src emacs-lisp 
+(setq inhibit-startup-screen t)
+#+end_src
 
-(setq inhibit-startup-screen t
-      initial-buffer-choice  nil)
+I don't want to start with any file/buffer in particular.
+BTW, setting the default directory to ~ does not work the way I want. Don't set the default-directory to "." because that (seems to) lead to a cycle.
+#+begin_src emacs-lisp 
+(setq initial-buffer-choice  nil)
+#+end_src
+
+Flash if command makes no sense, like pressing C-g even though it has nothing to do.
+#+begin_src emacs-lisp 
+(setq visible-bell t )
+;; ring-bell-function 'ignore       ; no sound
+#+end_src
+
+I hate lock files, auto saved files (I have dropbox)
+#+begin_src emacs-lisp 
+(setq create-lockfiles nil 
+      auto-save-default nil
+      )
+#+end_src
+
 
 #+begin_src emacs-lisp 
 (use-package emacs
   :config
-  (setq ;; ring-bell-function 'ignore       ; no sound
-        visible-bell t  ;; flash if command makes no sense, like when C-g has nothing to do
+  (setq 
         frame-resize-pixelwise t
-	;; Setting the default directory to ~ does not work the way I want. 
-        ;; default-directory "~/"   ;; don't set it to . because that seems to lead to a cycle
-        inhibit-startup-message t
  	;; The lines below do not seem to anything when the startup message is inhibited
 	;; initial-startup-screen t
 	;; initial-buffer-choice nil
         ;; inhibit-startup-echo-area-message t
         ;; kill-buffer "*scratch*"  ;; This doesn't seem to do anything.
         ;; initial-scratch-message "" ; make scratch message empty
-        kill-whole-line 'always  
         load-prefer-newer t ;;   Don't use the compiled code if it's the older package.
         create-lockfiles nil ;; no lockfiles
         auto-save-default nil ;; Do not autosave.
         indent-tabs-mode nil ;;  use spaces for indentation in stead of hard tabs
         ;; tab-width 4 ;;  Let's see how far I get with this quoted
         sentence-end-double-space 'nil ;; no double space at end of sentence
-        auto-fill-mode -1  ;; don't insert returns in long lines
         frame-title-format (list (format "%s %%S: %%j " (system-name))
               '(buffer-file-name "%f" (dired-directory dired-directory "%b"))
               )
@@ -45,17 +104,7 @@ When you don't know, or forgot, what a function does, put the point on the funct
         mouse-yank-at-point t;; middle-mouse-click pastes at mouse location
 	)
 
-  (menu-bar-mode -1)  ;; I want to use as much screen as possible.
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-  (horizontal-scroll-bar-mode -1)
-  (global-linum-mode t)               ;; enable line numbers globally
-  (global-hl-line-mode t)             ;; highlight the line with point
-  (global-visual-line-mode t)    
-  (column-number-mode t)
-  (fset 'yes-or-no-p 'y-or-n-p)       ;; Change all yes/no questions to y/n type
-  (save-place-mode 1)                 ;; save last visited place of buffer
-  (set-face-attribute 'default nil :height 95) ;; make font slightly smaller
+ 
 
   (set-language-environment "UTF-8") ; Allow for French accents
   (defun accents ()
@@ -236,6 +285,11 @@ For normal work I use the material theme.
 #+begin_src emacs-lisp 
 (use-package material-theme
   )
+#+end_src
+
+I prefer somehat smaller fonts.
+#+begin_src emacs-lisp 
+(set-face-attribute 'default nil :height 95) 
 #+end_src
 
 

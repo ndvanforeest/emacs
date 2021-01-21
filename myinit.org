@@ -9,6 +9,8 @@ When you don't know, or forgot, what a function does, put the point on the funct
 * General emacs config
 
 
+
+
 (setq inhibit-startup-screen t
       initial-buffer-choice  nil)
 
@@ -74,7 +76,6 @@ When you don't know, or forgot, what a function does, put the point on the funct
 
 #+end_src
 
-=ibuffer= opens a buffer with a nice overview of all open buffers.
 
 * The the
 
@@ -187,6 +188,11 @@ However, I then tried to make a new snippet ~M-x yas-new-snippet- and when savin
   (yas-global-mode 1))
 
 ; (use-package yasnippet-snippets)
+#+end_src
+
+Load the standard snippets of melpa.
+#+begin_src emacs-lisp 
+(use-package yasnippet-snippets)
 #+end_src
 
 BTW, after adding or changing a snippet's definition, run:

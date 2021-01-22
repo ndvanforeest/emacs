@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: exercise
+# key: ex-
+# --
+\begin{exercise}
+$0
+\begin{solution}
+\end{solution}
+\end{exercise}
+

@@ -8,3 +8,8 @@
 5. And now you can use it.
 
 [[https://ndvanforeest.github.io/pages/sites][Here]] is a site to a list of documenation on emacs. My main source is [[https://cestlaz.github.io/stories/emacs/][CestlaZ]].
+
+* Useful =init.el= files
+ 
+- https://github.com/snackon/Witchmacs
+

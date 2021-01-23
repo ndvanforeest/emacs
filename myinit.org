@@ -8,41 +8,54 @@ When you don't know, or forgot, what a function does, put the point on the funct
 
 * General emacs config
 
+** Maximize useful space, Disable most gui elements
+
 #+begin_src emacs-lisp
-(menu-bar-mode -1)  ;; I want to use as much screen as possible.
+(menu-bar-mode -1)  
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (horizontal-scroll-bar-mode -1)
 #+end_src
 
-Number the lines and columns
+
+
+** Number the lines and columns
+
 #+begin_src emacs-lisp 
 (global-linum-mode t)
 (column-number-mode t)
 #+end_src
 
-Change all yes/no questions to y/n type
+I tried the below, but then suddenly the left margin is much larger (at least when I open an org file). As I don't want that, I stick to what I had. 
+;; Emacs breaks certain modes when it has line-numbers-mode enabled, (like docview or ansi-term) so I utilize the approach of only enabling it on some major modes rather than globally
+;; (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+;; (add-hook 'text-mode-hook 'display-line-numbers-mode)
+
+
+** Change all yes/no questions to y/n type
 #+begin_src emacs-lisp 
 (fset 'yes-or-no-p 'y-or-n-p) 
 #+end_src
 
-Save last visited place  of a buffer. Very convenient when you open the file a later  time. 
+** Save last visited place  of a buffer.  
+Very convenient when you open the file a later  time.
 #+begin_src emacs-lisp 
 (save-place-mode 1)                 
 #+end_src
 
-Kill the whole line, rather than leaving the newline behind.
+** Kill the whole line, rather than leaving the newline behind.
 #+begin_src emacs-lisp 
 (setq  kill-whole-line 'always)
 #+end_src
 
-Highlight the line with point. 
+** Highlight the line with point. 
 #+begin_src emacs-lisp 
 (global-hl-line-mode t)       
 #+end_src
 
+** TODO Visual lines
 Visual Line mode provides support for editing by visual lines.
-It turns on word-wrapping in the current buffer, and rebinds C-a, C-e, and C-k to commands that operate by visual lines instead of logical lines.
+I don't quite know what the next sentence means: It turns on word-wrapping in the current buffer, and rebinds C-a, C-e, and C-k to commands that operate by visual lines instead of logical lines.
 #+begin_src emacs-lisp 
 (global-visual-line-mode t)    
 #+end_src
@@ -53,34 +66,48 @@ Don't break lines when they become too long.
 #+end_src
 
 
+** Disable the default startup screen
 I don't care to see the welcome anymore, even though it was very useful 22 years ago when I started to use emacs.
 #+begin_src emacs-lisp 
 (setq inhibit-startup-screen t)
 #+end_src
 
+** Start without a default buffer
 I don't want to start with any file/buffer in particular.
 BTW, setting the default directory to ~ does not work the way I want. Don't set the default-directory to "." because that (seems to) lead to a cycle.
 #+begin_src emacs-lisp 
 (setq initial-buffer-choice  nil)
 #+end_src
 
+** Flash
 Flash if command makes no sense, like pressing C-g even though it has nothing to do.
 #+begin_src emacs-lisp 
 (setq visible-bell t )
 ;; ring-bell-function 'ignore       ; no sound
 #+end_src
 
+** No lock files, no autosave, no backup files
 I hate lock files, auto saved files (I have dropbox)
 #+begin_src emacs-lisp 
-(setq create-lockfiles nil 
-      auto-save-default nil
-      )
+(setq create-lockfiles nil)
+(setq auto-save-default nil)
+(setq make-backup-files nil)
 #+end_src
+
+
+** Kill without asking
+Just kill, do not ask for confirmation
+#+begin_src emacs-lisp 
+(setq confirm-kill-processes nil)
+#+end_src
+** No double space at end of .
 
 I don't want a double space after a .
 #+begin_src emacs-lisp 
 (setq        sentence-end-double-space 'nil)
 #+end_src
+
+** Modify window/frame title
 
 Set filename in the title of the window.
 #+begin_src emacs-lisp 
@@ -88,11 +115,14 @@ Set filename in the title of the window.
 )
 #+end_src
 
+** Resizing
+
 Since I use i3, I don't care (or very little) about screen lay out. i3 manages all, and does a great job. Thus, resizing frames  a per pixel is not something I do.
 #+begin_src emacs-lisp 
 ;(setq frame-resize-pixelwise t)
 #+end_src
 
+** TODO The rest
 
 #+begin_src emacs-lisp 
 (use-package emacs
@@ -115,6 +145,42 @@ Since I use i3, I don't care (or very little) about screen lay out. i3 manages a
 
 
 #+end_src
+
+
+
+** TODO Automatic updating of buffers
+
+When exporting an org mode file to LaTeX and pdf, the tex file is modified.
+I like to see this (intermediate) tex file automatically updated in emacs.
+This is achieved with these settings.
+
+#+begin_src emacs-lisp 
+(global-auto-revert-mode 1) 
+(setq auto-revert-verbose nil) 
+#+end_src
+
+* Ediff
+
+#+begin_src emacs-lisp 
+(use-package ediff
+  ; side by side differences rather than in two buffers under neath each other.
+  :defer t
+  :config (setq ediff-split-window-function 'split-window-horizontally
+		ediff-window-setup-function 'ediff-setup-windows-plain ;; otherwise ediff opens another window
+		)
+  )
+#+end_src
+
+* Smex
+A convenient interface to recently and most frequently used commands.
+#+begin_src emacs-lisp 
+(use-package smex
+  :defer t
+  :bind (("M-x" . smex))
+  :config (smex-initialize)
+)
+#+end_src
+
 * Typing French characters
 
 Allow for French accents
@@ -160,18 +226,42 @@ Replacement for =ibuffer=. See https://github.com/alphapapa/bufler.el
 #+begin_src emacs-lisp 
 (use-package bufler 
   :bind (("C-x C-b" . bufler)))
-
 #+end_src
-* Some miscellaneous stuff
 
-When exporting an org mode file to LaTeX and pdf, the tex file is modified.
-I like to see this (intermediate) tex file automatically updated in emacs.
-This is achieved with these settings.
+* Kill buffer and its windows 
 
 
 #+begin_src emacs-lisp 
-(global-auto-revert-mode 1) ;; you might not want this
-(setq auto-revert-verbose nil) ;; or this
+(defun bjm/kill-this-buffer ()
+  "Kill the current buffer."
+  (interactive)
+  (kill-buffer (current-buffer)))
+
+(defun kill-buffer-and-its-windows (buffer)
+  "Kill BUFFER and delete its windows.  Default is `current-buffer'.
+BUFFER may be either a buffer or its name (a string)."
+  (interactive (list (read-buffer "Kill buffer: " (current-buffer) 'existing)))
+  (setq buffer  (get-buffer buffer))
+  (if (buffer-live-p buffer)            ; Kill live buffer only.
+      (let ((wins  (get-buffer-window-list buffer nil t))) ; On all frames.
+        (when (and (buffer-modified-p buffer)
+                   (fboundp '1on1-flash-ding-minibuffer-frame))
+          (1on1-flash-ding-minibuffer-frame t)) ; Defined in `oneonone.el'.
+        (when (kill-buffer buffer)      ; Only delete windows if buffer killed.
+          (dolist (win  wins)           ; (User might keep buffer if modified.)
+            (when (window-live-p win)
+              ;; Ignore error, in particular,
+              ;; "Attempt to delete the sole visible or iconified frame".
+              (condition-case nil (delete-window win) (error nil))))))
+    (when (interactive-p)
+      (error "Cannot kill buffer.  Not a live buffer: `%s'" buffer))))
+
+
+
+; (global-set-key (kbd "C-x k") 'bjm/kill-this-buffer)
+(global-set-key (kbd "C-x k") 'kill-buffer-and-its-windows)
+; (global-set-key (kbd "C-x w") 'delete-frame)
+; (substitute-key-definition 'kill-buffer 'kill-buffer-and-its-windows global-map)
 #+end_src
 
 * Which keys
@@ -193,31 +283,7 @@ Put a dir-name behind a file name when files have the same name.
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
 #+end_src
 
-* Some further general settings
-
-#+begin_src emacs-lisp 
-(use-package ediff
-  ; side by side differences rather than in two buffers under neath each other.
-  :defer t
-  :config (setq ediff-split-window-function 'split-window-horizontally
-		ediff-window-setup-function 'ediff-setup-windows-plain ;; otherwise ediff opens another window
-		)
-  )
-
-
-(setq confirm-kill-processes nil;  "Just kill, do not ask for confirmation
-      make-backup-files nil ;; My copies are on dropbox and github
-      )
-
-;; a convenient interface to your recently and most frequently used commands.
-(use-package smex
-  :defer t
-  :bind (("M-x" . smex))
-  :config (smex-initialize)
-)
-#+end_src
-
-* dired
+* Dired
 
 When browsing through the directories, I want the intermediate buffers that dired opens killed.
 
@@ -230,29 +296,26 @@ When browsing through the directories, I want the intermediate buffers that dire
      (define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file)))
 #+end_src
 
-* Snippets
+* Snipp
+ets
 
 Weird, it seems that my ~.emacs.d/snippets~ directory is not added to the path.
 However, I then tried to make a new snippet ~M-x yas-new-snippet- and when saving emacs asked me where to save the file and it suggested the ~.emacs.d/snippets/org-mode~ dir. Once I saved the file in that directory, it got found after ~(yas-reload-all)~. I infered from this that I have to save the snippets in directories like ~org-mode~ or ~latex-mode~. And this worked indeed.
 
-# #+begin_src emacs-lisp 
-# (use-package yasnippet
-#   :init
-# ;  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
-#   (yas-global-mode 1))
+#+begin_src emacs-lisp 
+(use-package yasnippet
+  :init
+;  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+  (yas-global-mode 1))
 
-# ; (use-package yasnippet-snippets)
-# #+end_src
+; (use-package yasnippet-snippets)
+#+end_src
 
-# Load the standard snippets of melpa.
-# #+begin_src emacs-lisp 
-# (use-package yasnippet-snippets)
-# #+end_src
+Load the standard snippets of melpa.
+#+begin_src emacs-lisp 
+(use-package yasnippet-snippets)
+#+end_src
 
-# BTW, after adding or changing a snippet's definition, run:
-# #+BEGIN_SRC emacs-lisp :tangle no
-# (yas-reload-all)
-# #+END_SRC
 
 
 
@@ -311,131 +374,38 @@ This dimms the buffer(s) that don't have point.
 
 * Parentheses
 
+** Show matching parentheses.
+I had the quoted code earlier, but I don't see the difference.
 #+begin_src emacs-lisp 
-(use-package paren   ;; shows matching parentheses in  text
-  :init (setq show-paren-delay 0)
-  :config (show-paren-mode +1)
-  )
+(show-paren-mode 1)
+;; (use-package paren   
+;;   :init (setq show-paren-delay 0)
+;;   :config (show-paren-mode +1)
+;;   )
+#+end_src
 
-(use-package elec-pair  ;; when typing make matching pair of e.g. brackets
-  :hook (prog-mode . electric-pair-mode)
-  )
+** Insert the matching right bracket
 
+As far I can tell, the pairs come automatically with the electric pair mode. I put them in quotes.
 
+#+BEGIN_SRC emacs-lisp
+  ;; (setq electric-pair-pairs '(
+  ;;                             (?\{ . ?\})
+  ;;                             (?\( . ?\))
+  ;;                             (?\[ . ?\])
+  ;;                             (?\" . ?\")
+  ;;                             ))
+(electric-pair-mode t)
+#+END_SRC
+
+** TODO Using rainbow delimiters? 
+I don't think I need this. I also don't quite get what it does. 
+#+begin_src emacs-lisp 
 ;; (use-package rainbow-delimiters
 ;;   :hook((prog-mode . rainbow-delimiters-mode)
 ;;         (text-mode . rainbow-delimiters-mode)
 ;;         )
 ;; )
-#+end_src
-
-* Org mode 
-
-I commented out =org-structure-template-alist= because I use =yasnippets= rather then =<p TAB= to get a python source code block.
-
-I commented out several header settings for =org-babel= code blocks.
-I think I prefer to have these options set per file, not here. 
-
-#+begin_src emacs-lisp 
-(use-package org
-  :config
-  (org-babel-do-load-languages
-   'org-babel-load-languages  ; I hope I never need any other languages then these
-   '((shell . t)
-     (python . t)
-     (emacs-lisp . t)
-     )
-   )
-  ;; (add-to-list 'org-structure-template-alist
-  ;;              '("p" . "src python ")
-  ;;              )
-  (setq org-confirm-babel-evaluate nil 
-        org-latex-listings 'minted
-	org-latex-packages-alist '(("" "minted"))
-	org-latex-pdf-process 
-	'("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-	 "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
-	org-src-preserve-indentation t
-	org-src-fontify-natively t ; does this work? 
-	org-latex-with-hyperref nil
-	org-list-allow-alphabetical t)
-  ;; (setq org-babel-default-header-args:python
-  ;;     '((:results . "output replace")
-  ;; 	(:session . "none")
-  ;; 	(:exports . "both")
-  ;; 	(:tangle . "no")))
-  ;; (setq org-babel-default-header-args:python
-  ;;     '((:results . "output replace")
-  ;; 	(:session . "none")
-  ;; 	(:exports . "both")
-  ;; 	(:cache .   "no")
-  ;; 	(:noweb . "no")
-  ;; 	(:hlines . "no")
-  ;; 	(:tangle . "no")
-  ;; 	(:eval . "never-export")))
-  :hook (org-mode . turn-on-org-cdlatex)
-  )
-
-
-
-(setq org-cycle-emulate-tab 'white)
-
-;; scale the latex preview figure that you get with C-c C-x C-l
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 5.0))
-
-;; (add-to-list 'org-latex-classes
-;;              '("article"
-;;                "\\documentclass{article}"
-;;                ("\\section{%s}" . "\\section*{%s}")
-;;                ("\\subsection{%s}" . "\\subsection*{%s}")
-;;                ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-;;                ("\\paragraph{%s}" . "\\paragraph*{%s}")
-;;                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-
-#+end_src
-
-
-
-
-Often I use the (very handy) LaTeX =subfiles=package. The next allows to export (=C-c C-e l l=) to a =\documentclass{subfile}=.
-I want to be able to export to a subfiles package.
-
-#+begin_src emacs-lisp 
-(require 'ox-latex)
-(with-eval-after-load 'ox-latex
-   (add-to-list 'org-latex-classes
-   '("subfiles"
-   "\\documentclass{subfiles}
-   [NO-DEFAULT-PACKAGES]
-   [NO-PACKAGES]"
-   ("\\section{%s}" . "\\section*{%s}")
-   ("\\subsection{%s}" . "\\subsection*{%s}")
-   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-   ("\\paragraph{%s}" . "\\paragraph*{%s}"))))
-#+end_src
-
-Make nice bullets when viewing =.org= files
-#+begin_src emacs-lisp 
-(use-package org-bullets
-  ; :config
-  ; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-  :hook(org-mode . org-bullets-mode) )
-#+end_src
-
-#+begin_src emacs-lisp 
-(use-package ob-async)
-
-#+end_src
-
-* Reveal.js
-
-#+begin_src emacs-lisp 
-(use-package ox-reveal
-  :config
-    (require 'ox-reveal)
-    (setq org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/")
-    (setq org-reveal-mathjax t)
-)
 #+end_src
 
 * Diminish
@@ -540,64 +510,110 @@ Company stands for "complete anything".
   )
 #+end_src
 
-* Python things
+* Org mode 
 
+I commented out =org-structure-template-alist= because I use =yasnippets= rather then =<p TAB= to get a python source code block.
 
-I tried =eglot=, but I found it unbearably slow.  With =company= and =elpy= I have much better performance. 
-
-
-
-
-Ensure to run =pip install jedi flake8=.
-Some people say the following is also necessary =pip install importmagic autopep8 yapf=, but I skipped them
-# #+begin_src emacs-lisp 
-# (use-package lsp-mode
-#   :config
-#   (setq lsp-highlight-symbol-at-point nil)
-#   (lsp-register-custom-settings
-#    '(("pyls.plugins.pyls_black.enabled" t t)))
-#   :hook (python-mode . lsp))
-
-# (use-package lsp-ui
-#   :commands lsp-ui-mode)
-# #+end_src
-
+I commented out several header settings for =org-babel= code blocks.
+I think I prefer to have these options set per file, not here. 
 
 #+begin_src emacs-lisp 
-(use-package elpy
-  :after python
-  :custom (elpy-rpc-backend "jedi")
+(use-package org
   :config
-  (remove-hook 'elpy-modules 'elpy-module-flymake)
-  (elpy-enable)
+  (org-babel-do-load-languages
+   'org-babel-load-languages  ; I hope I never need any other languages then these
+   '((shell . t)
+     (python . t)
+     (emacs-lisp . t)
+     )
+   )
+  ;; (add-to-list 'org-structure-template-alist
+  ;;              '("p" . "src python ")
+  ;;              )
+  (setq org-confirm-babel-evaluate nil 
+        org-latex-listings 'minted
+	org-latex-packages-alist '(("" "minted"))
+	org-latex-pdf-process 
+	'("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+	 "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
+	org-src-preserve-indentation t
+	org-src-fontify-natively t ; does this work? 
+	org-latex-with-hyperref nil
+	org-list-allow-alphabetical t)
+  ;; (setq org-babel-default-header-args:python
+  ;;     '((:results . "output replace")
+  ;; 	(:session . "none")
+  ;; 	(:exports . "both")
+  ;; 	(:tangle . "no")))
+  ;; (setq org-babel-default-header-args:python
+  ;;     '((:results . "output replace")
+  ;; 	(:session . "none")
+  ;; 	(:exports . "both")
+  ;; 	(:cache .   "no")
+  ;; 	(:noweb . "no")
+  ;; 	(:hlines . "no")
+  ;; 	(:tangle . "no")
+  ;; 	(:eval . "never-export")))
+  :hook (org-mode . turn-on-org-cdlatex)
   )
 
-(use-package blacken
-  :demand t
-  :after python
-  :config
-  (setq blacken-skip-string-normalization t
-        blacken-line-length 90
-        )
-  :hook(python-mode . blacken-mode)   ;; autoformat with black on save
-  )
+
+
+(setq org-cycle-emulate-tab 'white)
+
+;; scale the latex preview figure that you get with C-c C-x C-l
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 5.0))
+
+;; (add-to-list 'org-latex-classes
+;;              '("article"
+;;                "\\documentclass{article}"
+;;                ("\\section{%s}" . "\\section*{%s}")
+;;                ("\\subsection{%s}" . "\\subsection*{%s}")
+;;                ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+;;                ("\\paragraph{%s}" . "\\paragraph*{%s}")
+;;                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
 #+end_src
 
 
-Since I load elpy I don't think it is necessary to explicitly load =jedi=.
 
+
+Often I use the (very handy) LaTeX =subfiles=package. The next allows to export (=C-c C-e l l=) to a =\documentclass{subfile}=.
+I want to be able to export to a subfiles package.
 
 #+begin_src emacs-lisp 
-(setq python-indent-guess-indent-offset t)  
-(setq python-indent-guess-indent-offset-verbose nil)
+(require 'ox-latex)
+(with-eval-after-load 'ox-latex
+   (add-to-list 'org-latex-classes
+   '("subfiles"
+   "\\documentclass{subfiles}
+   [NO-DEFAULT-PACKAGES]
+   [NO-PACKAGES]"
+   ("\\section{%s}" . "\\section*{%s}")
+   ("\\subsection{%s}" . "\\subsection*{%s}")
+   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+   ("\\paragraph{%s}" . "\\paragraph*{%s}"))))
 #+end_src
 
-* Jupyter and ipython
-I don't use jupyter or ipyton, but org babel.
+Make nice bullets when viewing =.org= files
+#+begin_src emacs-lisp 
+(use-package org-bullets
+  ; :config
+  ; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  :hook(org-mode . org-bullets-mode) )
+#+end_src
 
 #+begin_src emacs-lisp 
-; (use-package jupyter)
-; (use-package ob-ipython)
+(use-package ob-async)
+
+#+end_src
+
+* htmlize
+
+Code highlighting, for  =nikola=, =reveal.js=, and perhaps more.
+
+#+begin_src emacs-lisp 
+(use-package htmlize)
 #+end_src
 
 * Latex
@@ -678,6 +694,7 @@ Since I use ELPA,  I stick to ~use-package latex~.
         LaTeX-command-style '(("" "%(PDF)%(latex) -shell-escape %S%(PDFout)"))
         TeX-file-extensions '("tex" "sty")
         TeX-ispell-extend-skip-list t
+        ; LaTeX-electric-left-right-brace t ; handled by cdlatex, see below
 	reftex-isearch-minor-mode t ; search whole document, not just the current file
         )
   (add-hook 'LaTeX-mode-hook
@@ -708,6 +725,19 @@ Since I use ELPA,  I stick to ~use-package latex~.
   ;; 	       )
   )
 #+end_src
+
+** CD latex
+
+#+begin_src emacs-lisp 
+;; (use-package cdlatex
+;;    :defer t
+;; )
+#+end_src
+
+Type ~C-c ?~ to get help.
+Eg. in a math enviroment type ~fr TAB~ to get a ~\frac~, and ~lr(~ to get a pair of left-right braces. Etc. 
+
+
 
 ** Reftex
 
@@ -745,12 +775,75 @@ Since I use ELPA,  I stick to ~use-package latex~.
 
 #+end_src
 
-** CD latex
+* Python things
+
+
+I tried =eglot=, but I found it unbearably slow.  With =company= and =elpy= I have much better performance. 
+
+
+
+
+Ensure to run =pip install jedi flake8=.
+Some people say the following is also necessary =pip install importmagic autopep8 yapf=, but I skipped them
+# #+begin_src emacs-lisp 
+# (use-package lsp-mode
+#   :config
+#   (setq lsp-highlight-symbol-at-point nil)
+#   (lsp-register-custom-settings
+#    '(("pyls.plugins.pyls_black.enabled" t t)))
+#   :hook (python-mode . lsp))
+
+# (use-package lsp-ui
+#   :commands lsp-ui-mode)
+# #+end_src
+
 
 #+begin_src emacs-lisp 
-(use-package cdlatex
-   :defer t
+(use-package elpy
+  :after python
+  :custom (elpy-rpc-backend "jedi")
+  :config
+  (remove-hook 'elpy-modules 'elpy-module-flymake)
+  (elpy-enable)
+  )
+
+(use-package blacken
+  :demand t
+  :after python
+  :config
+  (setq blacken-skip-string-normalization t
+        blacken-line-length 90
+        )
+  :hook(python-mode . blacken-mode)   ;; autoformat with black on save
+  )
+#+end_src
+
+
+Since I load elpy I don't think it is necessary to explicitly load =jedi=.
+
+
+#+begin_src emacs-lisp 
+(setq python-indent-guess-indent-offset t)  
+(setq python-indent-guess-indent-offset-verbose nil)
+#+end_src
+
+* Reveal.js
+
+#+begin_src emacs-lisp 
+(use-package ox-reveal
+  :config
+    (require 'ox-reveal)
+    (setq org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/")
+    (setq org-reveal-mathjax t)
 )
+#+end_src
+
+* Jupyter and ipython
+I don't use jupyter or ipyton, but org babel.
+
+#+begin_src emacs-lisp 
+; (use-package jupyter)
+; (use-package ob-ipython)
 #+end_src
 
 
@@ -772,12 +865,4 @@ I don't seem to use this.
 #   :bind (("C-x g" . magit-status))
 #   )
 # #+end_src
-
-* htmlize
-
-Code highlighting, for  =nikola=, =reveal.js=, and perhaps more.
-
-#+begin_src emacs-lisp 
-(use-package htmlize)
-#+end_src
 

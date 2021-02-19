@@ -60,6 +60,8 @@ I learned a lot about emacs from the following sites
 - =C-h f= to get function documentation
 - =C-h v= variable
 - =emacs-init-time= time it takes to start up emacs
+- "M-q" format elisp code
+- "emacs-init-time": gives time to load emacs
 
 
 * Load package
@@ -71,18 +73,19 @@ This performance trick  reduces the number of times the garbage collector will r
 #+end_src
 
 #+begin_src emacs-lisp
-
-
 (require 'package)
 ; (setq package-enable-at-startup nil)
 
-(setq package-achives '(("melpa" . "https://melpa.org/packages/")
-                        ("org" . "https://orgmode.org/elpa/")
-                        ("elpy" . "http://jorgenschaefer.github.io/packages/")
-                        '("htmlize" . "https://github.com/hniksic/emacs-htmlize")
-                        ("elpa" . "https://elpa.gnu.org/packages")))
+;; (setq package-archives '(("elpa" . "https://elpa.gnu.org/packages/")
+;;                         ("org" . "https://orgmode.org/elpa/")
+;;                         ;("melpa" . "https://melpa.org/packages")
+;;                         ("elpy" . "http://jorgenschaefer.github.io/packages/")
+;;                         ("htmlize" . "https://github.com/hniksic/emacs-htmlize")
+;; ))
 
-;; htlmlize is  needed by nikola to render code nicely
+(setq package-archives '( ("elpa" . "https://elpa.gnu.org/packages/")
+                          ("org" . "https://orgmode.org/elpa/")
+                          ("melpa" . "https://melpa.org/packages/")))
 
 ; (add-to-list 'package-archives '
 ;; (add-to-list 'package-archives '("org" . "https://stable.melpa.org/elpa/") t)
@@ -93,33 +96,28 @@ This performance trick  reduces the number of times the garbage collector will r
   (package-refresh-contents))
 #+end_src
 
-* Load use-package
+
+* Bootstrap use-package
 
 I set the variable =use-package-verbose= to =t= to see which packages get loaded during init and how long it takes to load them.
 
 #+begin_src emacs-lisp
-;; Bootstrap `use-package'
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
 
-;(require 'use-package-ensure)
 (require 'use-package)
 (setq use-package-always-ensure t)
-; (use-package-report)
-; (setq use-package-verbose t)
+(setq use-package-compute-statistics t)
+(setq use-package-verbose t)
 
-; TODO
-
-; i don't know whether I want this.
-; (setq use-package-always-defer t)
-
+(use-package no-littering)
 #+end_src
 
 * Custom file
 
 #+begin_src emacs-lisp
 (setq custom-file "~/.emacs.d/custom.el")
-(load custom-file)
+;(load custom-file)
 
 ; (org-babel-load-file (expand-file-name "~/.emacs.d/myinit.org"))
 
@@ -146,10 +144,8 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 #+end_src
 
 
-
 * Auto update
 #+begin_src emacs-lisp
-
 (use-package auto-package-update
   :custom
   (auto-package-update-interval 7)
@@ -159,16 +155,6 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
   (setq auto-package-update-delete-old-versions t)
   (auto-package-update-maybe)
   (auto-package-update-at-time "09:00"))
-
-
-; (use-package no-littering)
-#+end_src
-
-
-* Tangling this file to =init.el=
-
-#+begin_src emacs-lisp
-
 #+end_src
 
 * General emacs config
@@ -186,14 +172,14 @@ In an earlier version I put all the above in ~(use-package emacs)~, but I found 
 
 
 
-** Number the lines and columns
+** TODO Number the lines and columns
 
 #+begin_src emacs-lisp
 (global-linum-mode t)
 (column-number-mode t)
 #+end_src
 
-I tried the below, but then suddenly the left margin is much larger (at least when I open an org file). As I don't want that, I stick to what I had.
+todo I tried the below, but then suddenly the left margin is much larger (at least when I open an org file). As I don't want that, I stick to what I had.
 ;; Emacs breaks certain modes when it has line-numbers-mode enabled, (like docview or ansi-term) so I utilize the approach of only enabling it on some major modes rather than globally
 ;; (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 ;; (add-hook 'text-mode-hook 'display-line-numbers-mode)
@@ -385,27 +371,6 @@ Delete rest of the string up to a given character.
 ;  (global-prettify-symbols-mode t)
 #+END_SRC
 
-* Ediff
-
-#+begin_src emacs-lisp
-(use-package ediff
-  ; side by side differences rather than in two buffers under neath each other.
-  :defer t
-  :config (setq ediff-split-window-function 'split-window-horizontally
-        ediff-window-setup-function 'ediff-setup-windows-plain ;; otherwise ediff opens another window
-        )
-  )
-#+end_src
-* Smex
-A convenient interface to recently and most frequently used commands.
-#+begin_src emacs-lisp
-(use-package smex
-  :defer t
-  :bind (("M-x" . smex))
-  :config (smex-initialize)
-)
-#+end_src
-
 * Typing French characters
 
 Allow for French accents
@@ -422,40 +387,7 @@ Allow for French accents
 
 #+end_src
 
-* The the
-
-Search for occurrences of repetition of words, like "the the", "a a", and so on
-
-
-#+begin_src emacs-lisp
-(defun the-the ()
-       "Search forward for for a duplicated word."
-       (interactive)
-       (message "Searching for for duplicated words ...")
-       (push-mark)
-       ;; This regexp is not perfect
-       ;; but is fairly good over all:
-       (if (re-search-forward
-            "\\b\\([^@ \n\t]+\\)[ \n\t]+\\1\\b" nil 'move)
-           (message "Found duplicated word.")
-         (message "End of buffer")))
-
-     ;; Bind 'the-the' to  C-c \
-     (global-set-key "\C-c\\" 'the-the)
-#+end_src
-
-* Bufler
-
-Replacement for =ibuffer=. See https://github.com/alphapapa/bufler.el
-
-#+begin_src emacs-lisp
-(use-package bufler
-  :bind (("C-x C-b" . bufler)))
-#+end_src
-
 * Kill buffer and its windows
-
-
 #+begin_src emacs-lisp
 (defun bjm/kill-this-buffer ()
   "Kill the current buffer."
@@ -489,6 +421,54 @@ BUFFER may be either a buffer or its name (a string)."
 ; (substitute-key-definition 'kill-buffer 'kill-buffer-and-its-windows global-map)
 #+end_src
 
+* Ediff
+   by side differences rather than in two buffers under neath each other.
+;; otherwise ediff opens another window
+#+begin_src emacs-lisp
+(use-package ediff
+  :commands ediff
+  :config (setq ediff-split-window-function
+                'split-window-horizontally
+                ediff-window-setup-function
+                'ediff-setup-windows-plain ) )
+#+end_src
+* Smex
+A convenient interface to recently and most frequently used commands.
+#+begin_src emacs-lisp
+(use-package smex
+  :bind (("M-x" . smex))
+  :config (smex-initialize) )
+#+end_src
+
+* The the
+
+Search for occurrences of repetition of words, like "the the", "a a", and so on
+
+#+begin_src emacs-lisp
+(defun the-the ()
+       "Search forward for for a duplicated word."
+       (interactive)
+       (message "Searching for for duplicated words ...")
+       (push-mark)
+       ;; This regexp is not perfect
+       ;; but is fairly good over all:
+       (if (re-search-forward
+            "\\b\\([^@ \n\t]+\\)[ \n\t]+\\1\\b" nil 'move)
+           (message "Found duplicated word.")
+         (message "End of buffer")))
+
+     ;; Bind 'the-the' to  C-c \
+     (global-set-key "\C-c\\" 'the-the)
+#+end_src
+
+* Bufler
+Replacement for =ibuffer=. See https://github.com/alphapapa/bufler.el
+
+#+begin_src emacs-lisp
+(use-package bufler
+  :bind (("C-x C-b" . bufler)))
+#+end_src
+
 * COMMENT Which keys
 
 After typing the beginning of a keychord, like C-c, this package opens, after a second or so, the modeline with an overview of all possible keychords that have that particular combination as a start.
@@ -496,7 +476,7 @@ I don't know whether I find this useful.
 
 #+begin_src emacs-lisp
 (use-package which-key
-  :defer 0
+  :defer 1
   :diminish which-key-mode
   :config
   (which-key-mode)
@@ -505,9 +485,11 @@ I don't know whether I find this useful.
 
 
 
-* Dired
+* TODO Dired, zet in een use package
 
 When browsing through the directories, I want the intermediate buffers that dired opens killed.
+
+
 
 #+begin_src emacs-lisp
 (setq delete-by-moving-to-trash t)
@@ -521,20 +503,27 @@ When browsing through the directories, I want the intermediate buffers that dire
 * Snippets
 
 Weird, it seems that my ~.emacs.d/snippets~ directory is not added to the path.
-However, I then tried to make a new snippet ~M-x yas-new-snippet- and when saving emacs asked me where to save the file and it suggested the ~.emacs.d/snippets/org-mode~ dir. Once I saved the file in that directory, it got found after ~(yas-reload-all)~. I infered from this that I have to save the snippets in directories like ~org-mode~ or ~latex-mode~. And this worked indeed.
+However, I then tried to make a new snippet ~M-x yas-new-snippet~ and when saving, emacs asked me where to save the file and it suggested the ~.emacs.d/snippets/org-mode~ dir. Once I saved the file in that directory, it got found after ~(yas-reload-all)~. I infered from this that I have to save the snippets in directories like ~snippets/org-mode~ or ~snipppets/latex-mode~. And this works indeed.
+
+I don't know why I have to call ~yas-reload-all~, but if I don't my own snippets don't get loaded.
 
 #+begin_src emacs-lisp
 (use-package yasnippet
-  :defer 5
+  :defer 2
   :config
-;  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
-  (yas-global-mode 1))
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets/"))
+  (yas-global-mode 1)
+  (yas-reload-all)
+)
+
 #+end_src
+
+I added :hook and :mode to try to defer the loading of yasnippet. But all this gives errors. It only seems to work with :defer.
 
 Load the standard snippets of melpa.
 #+begin_src emacs-lisp
 (use-package yasnippet-snippets
-   :after yasnippet)
+  :after yasnippet)
 #+end_src
 
 I don't want a few of the default snippets to interfere with cdlatex.
@@ -593,14 +582,14 @@ This dimms the buffer(s) that don't have point.
 
 #+begin_src emacs-lisp
 (use-package dimmer
-  :demand t
+  :after material-theme
   :diminish
   :config (dimmer-mode t)
   (setq dimmer-fraction 0.3))
 #+end_src
 
 * Parentheses
-
+I don't think I want delimiters with different colors, hence no rainbow delimiters for me.
 ** Show matching parentheses.
 I had the quoted code earlier, but I don't see the difference.
 #+begin_src emacs-lisp
@@ -610,6 +599,7 @@ I had the quoted code earlier, but I don't see the difference.
 ;;   :config (show-paren-mode +1)
 ;;   )
 #+end_src
+((()))
 
 ** Insert the matching right bracket
 
@@ -625,24 +615,16 @@ As far I can tell, the pairs come automatically with the electric pair mode. I p
 (electric-pair-mode t)
 #+END_SRC
 
-** TODO Using rainbow delimiters?
-I don't think I need this. I also don't quite get what it does.
-#+begin_src emacs-lisp
-;; (use-package rainbow-delimiters
-;;   :hook((prog-mode . rainbow-delimiters-mode)
-;;         (text-mode . rainbow-delimiters-mode)
-;;         )
-;; )
-#+end_src
+
 
 * Diminish
 
+suppresses minor modes in the modeline. However, I wonder whether this is necessary when I give the :diminish option in use-package.
+
 #+begin_src emacs-lisp
-(use-package diminish
-  :defer 0)
+(use-package diminish)
 #+end_src
 
-Seems to suppress minor modes in the modeline, but I guess I don't to see the effect of it.
 
 * ripgrep, fast searching
 
@@ -652,16 +634,15 @@ I replaced =ack= for =rg=. I include the message to see whether it got loaded or
 (use-package rg
   :commands rg
   :config
-  ;; (message "rg gets loaded")
   (rg-enable-default-bindings)
   )
 #+end_src
 
-* Deft: Taking notes
+* Deft
+Deft is a very practical note taking package.
 
 #+begin_src emacs-lisp
-(use-package deft  ;; very practical note taking package
-  :commands deft
+(use-package deft
   :bind ("C-c d" . deft)
   :config
   (setq deft-extensions '("txt" "tex" "org"))
@@ -669,32 +650,13 @@ I replaced =ack= for =rg=. I include the message to see whether it got loaded or
   (setq deft-auto-save-interval 0))
 #+end_src
 
-* Atomic chrome
-Type emails and boxes within emacs. I never use it though.
-
-https://github.com/imjonathan/atomic-chrome
-
-#+begin_src emacs-lisp
-(use-package atomic-chrome
-  :commands atomic-chrome-start-server
-  :config
-  (atomic-chrome-start-server)
-  (setq atomic-chrome-buffer-open-style 'frame)
-  )
-#+end_src
-
-Kill frame with =kill-frame= with keychord =C-x 5 0=.
-
-Set a shortcut like =M-e= in chromium by typing =chrome://extensions/shortcuts= in the chrome search bar (on top), and then type =M-e=.
-
 * Syntax checking
 #+begin_src emacs-lisp
 (use-package flycheck
-  ; :mode ("\\.py\\'" "\\.org\\'" "\\.tex\\'")
+  :defer 1
   :diminish
   :config  (global-flycheck-mode)
-  :hook((prog-mode . flycheck-mode)
-        (text-mode . flycheck-mode)))
+)
 #+end_src
 
 * Spell checking
@@ -703,14 +665,11 @@ Set a shortcut like =M-e= in chromium by typing =chrome://extensions/shortcuts= 
 (use-package flyspell
   :commands ispell
   :config
-  (message "flyspell gets loaded")
   (flyspell-mode 1)
   (setq ispell-program-name "aspell"
     ispell-list-command "--list" ;; this is necessary when using aspell instead of ispell
     ;; ispell-dictionary   "english" ; Default dictionary to use
     )
-  ;:hook((prog-mode . flyspell-mode)
-  ;      (text-mode . flyspell-mode) )
   )
 #+end_src
 
@@ -808,8 +767,6 @@ I think I prefer to have these options set per file, not here.
 #+end_src
 
 
-
-
 Often I use the (very handy) LaTeX =subfiles=package. The next allows to export (=C-c C-e l l=) to a =\documentclass{subfile}=.
 I want to be able to export to a subfiles package.
 
@@ -830,9 +787,7 @@ I want to be able to export to a subfiles package.
 Make nice bullets when viewing =.org= files
 #+begin_src emacs-lisp
 (use-package org-bullets
-  ; :config
-  ; (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-  :hook(org-mode . org-bullets-mode) )
+   :after org-mode)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -842,7 +797,7 @@ Make nice bullets when viewing =.org= files
 
 * htmlize
 
-Code highlighting, for  =nikola=, =reveal.js=, and perhaps more.
+Code highlighting required for  =nikola=, =reveal.js=, and perhaps more.
 
 #+begin_src emacs-lisp
 (use-package htmlize
@@ -908,19 +863,18 @@ I believe tex-site is right in your case since you use the git version of AUCTeX
 ELPA users shouldn't use tex-site since the file gets required during package initialization.
 ---
 
-Since I use ELPA,  I stick to ~use-package latex~.
+Since I use ELPA, I stick to ~use-package latex~.
+I had a problem with updating auctex; I have no idea why. Then I removed melpa from the package list, and then things worked again.
 
 #+begin_src emacs-lisp
-(use-package latex; tex-site ;; If I don't use latex here, the add-to-list below does not work
+(use-package latex ; tex-site ;; If I don't use latex here, the add-to-list below does not work
   :ensure auctex
-  :defer t
   :mode ("\\.tex\\'" . latex-mode)
-  :init
-  (setq reftex-plug-into-AUCTeX t )
   :bind (("M-q" . ales/fill-paragraph))  ;; start every sentence on a new line
   :config
   ;; (setq-default TeX-master nil ); by each new fie AUCTEX will ask for a master fie.
   (setq-default auto-fill-function nil) ;;
+  (setq reftex-plug-into-AUCTeX t )
   (setq TeX-auto-save t
         TeX-parse-self t
         TeX-save-query nil  ;dont ask to save if you want to compile with C-c C-c
@@ -967,14 +921,18 @@ This gets automatically loaded via the latex hook above.
 Perhaps the thing below is necessary to download it in case I update the packages, by deleting ~elpa/~.
 So, try to delete the cdlatex package, and see what happens with the lines below commented out.
 #+begin_src emacs-lisp
-;; (use-package cdlatex
-;;    :defer t
-;; )
+(use-package cdlatex
+    :after latex)
 #+end_src
 
 Type ~C-c ?~ to get help.
 Eg. in a math enviroment type ~fr TAB~ to get a ~\frac~, and ~lr(~ to get a pair of left-right braces. Etc.
 
+** Auctex
+#+begin_src emacs-lisp
+;(use-package auctex
+;  :after latex)
+#+end_src
 
 
 ** Reftex
@@ -1081,6 +1039,7 @@ I don't use jupyter or ipyton, but org babel.
 * csv
 #+begin_src emacs-lisp
 (use-package csv-mode
+  :disabled
   :mode ("\\.[Cc][Ss][Vv]\\'" . csv-mode)
   :config (setq csv-separators '("," ";" "|" " ")))
 #+end_src
@@ -1091,9 +1050,29 @@ I don't seem to use this.
 
 #+begin_src emacs-lisp
 (use-package magit
+  :disabled
   :bind (("C-x g" . magit-status))
   )
 #+end_src
+
+* Atomic chrome
+Type emails and boxes within emacs. I never use it though.
+
+https://github.com/imjonathan/atomic-chrome
+
+#+begin_src emacs-lisp
+(use-package atomic-chrome
+  :disabled
+  :commands atomic-chrome-start-server
+  :config
+  (atomic-chrome-start-server)
+  (setq atomic-chrome-buffer-open-style 'frame)
+  )
+#+end_src
+
+Kill frame with =kill-frame= with keychord =C-x 5 0=.
+
+Set a shortcut like =M-e= in chromium by typing =chrome://extensions/shortcuts= in the chrome search bar (on top), and then type =M-e=.
 
 
 * Final things

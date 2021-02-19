@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: aap
-# key: aap_
-# --
-#+begin_src shell  aap
-$0
-#+end_src

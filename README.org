@@ -97,9 +97,8 @@ This performance trick  reduces the number of times the garbage collector will r
 #+end_src
 
 
-* Bootstrap use-package
+* Use-package
 
-I set the variable =use-package-verbose= to =t= to see which packages get loaded during init and how long it takes to load them.
 
 #+begin_src emacs-lisp
 (unless (package-installed-p 'use-package)
@@ -107,11 +106,22 @@ I set the variable =use-package-verbose= to =t= to see which packages get loaded
 
 (require 'use-package)
 (setq use-package-always-ensure t)
-(setq use-package-compute-statistics t)
-(setq use-package-verbose t)
+; (setq use-package-compute-statistics t)
+; (setq use-package-verbose t)
+#+end_src
 
+- =use-package-verbose t= to  see which packages get loaded during init and how long it takes to load them.
+- =(use-package-compute-statistics t)= to assemble some statistics. With M-x use-package-report you can see the status of all loaded packages.
+
+
+* No littering
+
+#+begin_src emacs-lisp
 (use-package no-littering)
 #+end_src
+
+
+
 
 * Custom file
 
@@ -144,18 +154,7 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 #+end_src
 
 
-* Auto update
-#+begin_src emacs-lisp
-(use-package auto-package-update
-  :custom
-  (auto-package-update-interval 7)
-  (auto-package-update-prompt-before-update t)
-  (auto-package-update-hide-results t)
-  :config
-  (setq auto-package-update-delete-old-versions t)
-  (auto-package-update-maybe)
-  (auto-package-update-at-time "09:00"))
-#+end_src
+
 
 * General emacs config
 
@@ -168,6 +167,8 @@ In an earlier version I put all the above in ~(use-package emacs)~, but I found 
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (horizontal-scroll-bar-mode -1)
+(set-fringe-mode 30)        ; Give some breathing room
+
 #+end_src
 
 
@@ -175,14 +176,20 @@ In an earlier version I put all the above in ~(use-package emacs)~, but I found 
 ** TODO Number the lines and columns
 
 #+begin_src emacs-lisp
-(global-linum-mode t)
 (column-number-mode t)
 #+end_src
 
-todo I tried the below, but then suddenly the left margin is much larger (at least when I open an org file). As I don't want that, I stick to what I had.
-;; Emacs breaks certain modes when it has line-numbers-mode enabled, (like docview or ansi-term) so I utilize the approach of only enabling it on some major modes rather than globally
-;; (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-;; (add-hook 'text-mode-hook 'display-line-numbers-mode)
+The newer way is to use =(global-display-line-numbers-mode t)=, but no idea why
+
+#+begin_src emacs-lisp
+;(global-linum-mode t)
+(global-display-line-numbers-mode t)
+
+;; Disable line numbers for org mode
+(dolist (mode '(org-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+#+end_src
 
 
 ** Change all yes/no questions to y/n type
@@ -208,14 +215,28 @@ Very convenient when you open the file a later  time.
 
 ** TODO Visual lines
 Visual Line mode provides support for editing by visual lines.
-I don't quite know what the next sentence means: It turns on word-wrapping in the current buffer, and rebinds C-a, C-e, and C-k to commands that operate by visual lines instead of logical lines.
+
+It turns on word-wrapping in the current buffer; without word-wrapping,  when word falls at the end of the line, it is just split into two parts to meet the line lenght; with word-wrapping,  words  are not chopped into two parts. Moreover, this mode1 rebinds C-a, C-e, and C-k to commands that operate by visual lines instead of logical lines.
 #+begin_src emacs-lisp
 (global-visual-line-mode t)
 #+end_src
 
-Don't break lines when they become too long.
+Don't break lines when they become too long. I used this until I discovered visual-fill-column, see below. Since then, I removed this
 #+begin_src emacs-lisp
-(setq auto-fill-mode -1)
+; (setq auto-fill-mode -1)
+#+end_src
+
+
+Visual Fill Column is a small Emacs minor mode that mimics the effect of FillColumn in VisualLineMode. Instead of wrapping lines at the window edge, which is the standard behaviour of visual-line-mode, it wraps lines at fill-column. If fill-column is too large for the window, the text is wrapped at the window edge.
+
+#+begin_src emacs-lisp
+(defun efs/text-mode-visual-fill ()
+  (setq visual-fill-column-width 150
+        visual-fill-column-left-text t)
+  (visual-fill-column-mode 1))
+
+(use-package visual-fill-column
+   :hook (text-mode . efs/text-mode-visual-fill))
 #+end_src
 
 
@@ -230,6 +251,7 @@ I don't want to start with any file/buffer in particular.
 BTW, setting the default directory to ~ does not work the way I want. Don't set the default-directory to "." because that (seems to) lead to a cycle.
 #+begin_src emacs-lisp
 (setq initial-buffer-choice  nil)
+(setq initial-scratch-message nil)
 #+end_src
 
 ** Flash
@@ -421,6 +443,20 @@ BUFFER may be either a buffer or its name (a string)."
 ; (substitute-key-definition 'kill-buffer 'kill-buffer-and-its-windows global-map)
 #+end_src
 
+* Auto update
+
+#+begin_src emacs-lisp
+(use-package auto-package-update
+  :custom
+  (auto-package-update-interval 7)
+  (auto-package-update-prompt-before-update t)
+  (auto-package-update-hide-results t)
+  :config
+  (setq auto-package-update-delete-old-versions t)
+  (auto-package-update-maybe)
+  (auto-package-update-at-time "09:00"))
+#+end_src
+
 * Ediff
    by side differences rather than in two buffers under neath each other.
 ;; otherwise ediff opens another window
@@ -469,35 +505,114 @@ Replacement for =ibuffer=. See https://github.com/alphapapa/bufler.el
   :bind (("C-x C-b" . bufler)))
 #+end_src
 
-* COMMENT Which keys
+* Which keys
 
 After typing the beginning of a keychord, like C-c, this package opens, after a second or so, the modeline with an overview of all possible keychords that have that particular combination as a start.
-I don't know whether I find this useful.
+I  find this quite useful.
 
 #+begin_src emacs-lisp
 (use-package which-key
-  :defer 1
+  :init (which-key-mode)
   :diminish which-key-mode
   :config
-  (which-key-mode)
   (setq which-key-idle-delay 1))
 #+end_src
 
 
+* Dired
 
-* TODO Dired, zet in een use package
+Dired is a built-in file manager for Emacs that does some pretty amazing things!  Here are some key bindings you should try out:
 
-When browsing through the directories, I want the intermediate buffers that dired opens killed.
+** Key bindings
 
+*** Navigation
 
+*Emacs* / *Evil*
+- =n= / =j= - next line
+- =p= / =k= - previous line
+- =j= / =J= - jump to file in buffer
+- =RET= - select file or directory
+- =^= - go to parent directory
+- =S-RET= / =g O= - Open file in "other" window
+- =M-RET= - Show file in other window without focusing (previewing files)
+- =g o= (=dired-view-file=) - Open file but in a "preview" mode, close with =q=
+- =g= / =g r= Refresh the buffer with =revert-buffer= after changing configuration (and after filesystem changes!)
+
+*** Marking files
+
+- =m= - Marks a file
+- =u= - Unmarks a file
+- =U= - Unmarks all files in buffer
+- =* t= / =t= - Inverts marked files in buffer
+- =% m= - Mark files in buffer using regular expression
+- =*= - Lots of other auto-marking functions
+- =k= / =K= - "Kill" marked items (refresh buffer with =g= / =g r= to get them back)
+- Many operations can be done on a single file if there are no active marks!
+
+*** Copying and Renaming files
+
+- =C= - Copy marked files (or if no files are marked, the current file)
+- Copying single and multiple files
+- =U= - Unmark all files in buffer
+- =R= - Rename marked files, renaming multiple is a move!
+- =% R= - Rename based on regular expression: =^test= , =old-\&=
+
+*Power command*: =C-x C-q= (=dired-toggle-read-only=) - Makes all file names in the buffer editable directly to rename them!  Press =Z Z= to confirm renaming or =Z Q= to abort.
+
+*** Deleting files
+
+- =D= - Delete marked file
+- =d= - Mark file for deletion
+- =x= - Execute deletion for marks
+- =delete-by-moving-to-trash= - Move to trash instead of deleting permanently
+
+*** Creating and extracting archives
+
+- =Z= - Compress or uncompress a file or folder to (=.tar.gz=)
+- =c= - Compress selection to a specific file
+- =dired-compress-files-alist= - Bind compression commands to file extension
+
+*** Other common operations
+
+- =T= - Touch (change timestamp)
+- =M= - Change file mode
+- =O= - Change file owner
+- =G= - Change file group
+- =S= - Create a symbolic link to this file
+- =L= - Load an Emacs Lisp file into Emacs
+
+*** Configuration
 
 #+begin_src emacs-lisp
-(setq delete-by-moving-to-trash t)
-; Delete intermediate buffers when navigating through dired.
-(eval-after-load "dired"
- #'(lambda ()
-     (put 'dired-find-alternate-file 'disabled nil)
-     (define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file)))
+
+  (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
+    :bind (("C-x C-j" . dired-jump))
+    :custom ((dired-listing-switches "-agho --group-directories-first")))
+
+  (use-package dired-single
+    :after dired )
+
+  (use-package dired-hide-dotfiles
+    :hook (dired-mode . dired-hide-dotfiles-mode))
+
+#+end_src
+
+
+
+** Kill intermediate buffers
+
+When browsing through the directories, dired keeps open all intermediate buffers.
+That used to mess up my buffer list. However, now buffler keeps the buffer list pretty well organized. Perhaps I don't need to kill these buffers anymore.
+
+#+begin_src emacs-lisp
+;; (setq delete-by-moving-to-trash t)
+;; ; Delete intermediate buffers when navigating through dired.
+;; (eval-after-load "dired"
+;;  #'(lambda ()
+;;      (put 'dired-find-alternate-file 'disabled nil)
+;;      (define-key dired-mode-map (kbd "RET") #'dired-find-alternate-file)))
 #+end_src
 
 * Snippets
@@ -511,9 +626,7 @@ I don't know why I have to call ~yas-reload-all~, but if I don't my own snippets
 (use-package yasnippet
   :defer 2
   :config
-  (setq yas-snippet-dirs '("~/.emacs.d/snippets/"))
   (yas-global-mode 1)
-  (yas-reload-all)
 )
 
 #+end_src
@@ -527,21 +640,28 @@ Load the standard snippets of melpa.
 #+end_src
 
 I don't want a few of the default snippets to interfere with cdlatex.
-#+begin_src shell
+#+begin_src shell :results none
 cd elpa/yasnippet-snippets-*/snippets/latex-mode
 rm frame
 rm frac
 #+end_src
 
+#+RESULTS:
+
 
 * ido
 
-=ido= provides auto completion to find files and open buffers.
+=ido= provides auto completion when finding files and opening buffers.
 It also hides lots of files I typically don't want to see when searching for/opening files from a directory.
+
+I don't know why, but if I defer the loading of ido, it does not load well later.
+Defering also turns out not to be a good idea, because nearly the first thing I do after opening emacs is search for and open a file.
+Hence, I seem to need ido directly anyway.
 
 #+begin_src emacs-lisp
 (use-package ido
-  :commands (ido-find-file)
+  :demand t
+  ; :commands (ido-find-file)
   :config
   (setq ido-everywhere t
     ido-enable-flex-matching t ;; show any name that has the typed characters
@@ -564,16 +684,33 @@ I don't think I'll need ivy or helm for my purposes.
 
 * Theming
 
+#+begin_src emacs-lisp
+(use-package modus-themes
+  :ensure
+  :init
+  ;; Add all your customizations prior to loading the themes
+  (setq modus-themes-slanted-constructs t
+        modus-themes-bold-constructs nil)
+
+  ;; Load the theme files before enabling a theme
+  (modus-themes-load-themes)
+  :config
+  ;; Load the theme of your choice:
+  ;(modus-themes-load-operandi) ;; OR
+  (modus-themes-load-vivendi)
+  :bind ("<f5>" . modus-themes-toggle))
+#+end_src
+
 For normal work I use the material theme.
 
 #+begin_src emacs-lisp
-(use-package material-theme
-  :demand t)
+;; (use-package material-theme
+;;   :demand t)
 #+end_src
 
 I prefer somehat smaller fonts.
 #+begin_src emacs-lisp
-(set-face-attribute 'default nil :height 95)
+(set-face-attribute 'default nil :height 95) ; 95
 #+end_src
 
 * Dimmer
@@ -582,40 +719,23 @@ This dimms the buffer(s) that don't have point.
 
 #+begin_src emacs-lisp
 (use-package dimmer
-  :after material-theme
   :diminish
   :config (dimmer-mode t)
-  (setq dimmer-fraction 0.3))
+  (setq dimmer-fraction 0.3)
+    (setq dimmer-adjustment-mode :foreground)
+    (setq dimmer-use-colorspace :rgb) ; cielab)
+)
 #+end_src
 
 * Parentheses
-I don't think I want delimiters with different colors, hence no rainbow delimiters for me.
-** Show matching parentheses.
-I had the quoted code earlier, but I don't see the difference.
 #+begin_src emacs-lisp
 (show-paren-mode 1)
-;; (use-package paren
-;;   :init (setq show-paren-delay 0)
-;;   :config (show-paren-mode +1)
-;;   )
+
+;(use-package rainbow-delimiters
+;  :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
-((()))
 
-** Insert the matching right bracket
-
-As far I can tell, the pairs come automatically with the electric pair mode. I put them in quotes.
-
-#+BEGIN_SRC emacs-lisp
-  ;; (setq electric-pair-pairs '(
-  ;;                             (?\{ . ?\})
-  ;;                             (?\( . ?\))
-  ;;                             (?\[ . ?\])
-  ;;                             (?\" . ?\")
-  ;;                             ))
-(electric-pair-mode t)
-#+END_SRC
-
-
+I don't like rainbow colors; I find it harder to read  code.
 
 * Diminish
 
@@ -626,7 +746,8 @@ suppresses minor modes in the modeline. However, I wonder whether this is necess
 #+end_src
 
 
-* ripgrep, fast searching
+* Ripgrep, fast searching
+
 
 I replaced =ack= for =rg=. I include the message to see whether it got loaded or not.
 
@@ -661,16 +782,49 @@ Deft is a very practical note taking package.
 
 * Spell checking
 
+I don't want on the fly spell checking, so no flyspell for me. (Sometimes I type a word, and then later I remove it. So, why bother getting the spelling correct right away?)
+
+Telling from the modeline, ispell automatically loads aspell, so I commented that part.
+
 #+begin_src emacs-lisp
-(use-package flyspell
-  :commands ispell
+(use-package ispell
+  :commands ispell-buffer
   :config
-  (flyspell-mode 1)
-  (setq ispell-program-name "aspell"
-    ispell-list-command "--list" ;; this is necessary when using aspell instead of ispell
-    ;; ispell-dictionary   "english" ; Default dictionary to use
-    )
-  )
+  ;; (setq ispell-program-name "aspell"
+  ;;    ispell-list-command "--list" ;; this is necessary when using aspell instead of ispell
+  ;;   )
+  (setcar ispell-tex-skip-alists  ;; skip ij in latex environments.
+        (append
+         (car ispell-tex-skip-alists)
+         '(("[^\\]\\$" . "[^\\]\\$")))))
+#+end_src
+
+* Python
+
+
+I tried =eglot=, but I found it unbearably slow.  I also tried LSP, but it does not work the way I like to see. With =company= and =elpy= I have much better performance.
+
+
+Ensure to run =pip install jedi flake8=.
+Some people say the following is also necessary =pip install importmagic autopep8 yapf=, but I skipped them
+
+
+
+#+begin_src emacs-lisp
+(use-package elpy
+  :diminish
+  :ensure t
+  :defer t
+  :init
+  (advice-add 'python-mode :before 'elpy-enable))
+
+(use-package blacken
+  :diminish
+  :after python
+  :config
+  (setq blacken-skip-string-normalization t
+        blacken-line-length 90)
+  :hook(python-mode . blacken-mode))
 #+end_src
 
 * Autocompletion
@@ -692,12 +846,13 @@ Company stands for "complete anything".
 (use-package company
   :bind (:map company-active-map
               ("C-n" . company-select-next)
-              ("C-p" . company-select-previous)
-              )
+              ("C-p" . company-select-previous))
   :config
   (setq company-idle-delay 0.0)
-  (global-company-mode t)
-  )
+  (global-company-mode t) )
+
+;(use-package company-box
+;  :hook (company-mode . company-box-mode))
 #+end_src
 
 * Org mode
@@ -705,10 +860,11 @@ Company stands for "complete anything".
 I commented out =org-structure-template-alist= because I use =yasnippets= rather then =<p TAB= to get a python source code block.
 
 I commented out several header settings for =org-babel= code blocks.
-I think I prefer to have these options set per file, not here.
+I think I prefer to have these options set per file, not here. I also don't seem to want org-latex-classes as I specify what I want in the files themselves.
 
 #+begin_src emacs-lisp
 (use-package org
+  :pin org   ; download from org
   :mode ("\\.org\\'" . org-mode)
   :config
   (require 'ox-latex)
@@ -716,54 +872,23 @@ I think I prefer to have these options set per file, not here.
    'org-babel-load-languages
    '((shell . t)
      (python . t)
-     (emacs-lisp . t)
-     )
-   )
+     (emacs-lisp . t)))
   ;; (add-to-list 'org-structure-template-alist
   ;;              '("p" . "src python ")
   ;;              )
   (setq org-confirm-babel-evaluate nil
         org-latex-listings 'minted
-    org-latex-packages-alist '(("" "minted"))
-    org-latex-pdf-process
-    '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-     "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
-    org-src-preserve-indentation t
-    org-src-fontify-natively t ; does this work?
-    org-latex-with-hyperref nil
-    org-list-allow-alphabetical t)
-  ;; (setq org-babel-default-header-args:python
-  ;;     '((:results . "output replace")
-  ;;    (:session . "none")
-  ;;    (:exports . "both")
-  ;;    (:tangle . "no")))
-  ;; (setq org-babel-default-header-args:python
-  ;;     '((:results . "output replace")
-  ;;    (:session . "none")
-  ;;    (:exports . "both")
-  ;;    (:cache .   "no")
-  ;;    (:noweb . "no")
-  ;;    (:hlines . "no")
-  ;;    (:tangle . "no")
-  ;;    (:eval . "never-export")))
+        org-latex-packages-alist '(("" "minted"))
+        org-latex-with-hyperref nil
+        org-latex-pdf-process
+        '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+          "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f")
+        org-src-preserve-indentation t
+        org-src-fontify-natively t ; does this work?
+        org-list-allow-alphabetical t)
    (setq org-cycle-emulate-tab 'white)
    :hook ((org-mode . turn-on-org-cdlatex)
-          (org-mode . org-indent-mode))
-  )
-
-
-;; scale the latex preview figure that you get with C-c C-x C-l
-;(setq org-format-latex-options (plist-put org-format-latex-options :scale 5.0))
-
-;; (add-to-list 'org-latex-classes
-;;              '("article"
-;;                "\\documentclass{article}"
-;;                ("\\section{%s}" . "\\section*{%s}")
-;;                ("\\subsection{%s}" . "\\subsection*{%s}")
-;;                ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-;;                ("\\paragraph{%s}" . "\\paragraph*{%s}")
-;;                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-
+          (org-mode . org-indent-mode)))
 #+end_src
 
 
@@ -784,18 +909,25 @@ I want to be able to export to a subfiles package.
 ;;    ("\\paragraph{%s}" . "\\paragraph*{%s}"))))
 #+end_src
 
-Make nice bullets when viewing =.org= files
+**  Nice bullets
 #+begin_src emacs-lisp
 (use-package org-bullets
-   :after org-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "☯" "○" "☯" "✸" "☯" "✿" "☯" "✜" "☯" "◆" "☯" "▶"))
+  (org-ellipsis "⤵")
+  :hook (org-mode . org-bullets-mode))
 #+end_src
+
+** ob async
+
+ob-async enables asynchronous execution of org-babel src blocks.
 
 #+begin_src emacs-lisp
 (use-package ob-async
   :after org-mode)
 #+end_src
 
-* htmlize
+** htmlize
 
 Code highlighting required for  =nikola=, =reveal.js=, and perhaps more.
 
@@ -904,6 +1036,16 @@ I had a problem with updating auctex; I have no idea why. Then I removed melpa f
                   )
               )
             )
+  (add-hook 'LaTeX-mode-hook
+          '(lambda ()
+             (setq ispell-tex-skip-alists
+                   (list
+                    (append
+                     (car ispell-tex-skip-alists)
+                     '(("[^\\]\\$" . "[^\\]\\$")))
+                    (cadr ispell-tex-skip-alists))) ))
+
+
   (add-to-list 'LaTeX-verbatim-environments "exercise" "solution")
   ;; (add-to-list 'LaTeX-indent-environment-list
   ;;           '("exercise" current-indentation)
@@ -971,61 +1113,18 @@ Eg. in a math enviroment type ~fr TAB~ to get a ~\frac~, and ~lr(~ to get a pair
 
 #+end_src
 
-* Python things
-
-
-I tried =eglot=, but I found it unbearably slow.  With =company= and =elpy= I have much better performance.
-
-
-Ensure to run =pip install jedi flake8=.
-Some people say the following is also necessary =pip install importmagic autopep8 yapf=, but I skipped them
-# #+begin_src emacs-lisp
-# (use-package lsp-mode
-#   :config
-#   (setq lsp-highlight-symbol-at-point nil)
-#   (lsp-register-custom-settings
-#    '(("pyls.plugins.pyls_black.enabled" t t)))
-#   :hook (python-mode . lsp))
-
-# (use-package lsp-ui
-#   :commands lsp-ui-mode)
-# #+end_src
-
-
-#+begin_src emacs-lisp
-(use-package elpy
-  :after python
-  :custom (elpy-rpc-backend "jedi")
-  :config
-  (remove-hook 'elpy-modules 'elpy-module-flymake)
-  (elpy-enable)
-  (setq python-indent-guess-indent-offset t)
-  (setq python-indent-guess-indent-offset-verbose nil))
-
-(use-package blacken
-  :after python
-  :config
-  (setq blacken-skip-string-normalization t
-        blacken-line-length 90
-        )
-  :hook(python-mode . blacken-mode)   ;; autoformat with black on save
-  )
-#+end_src
-
-
-Since I load elpy I don't think it is necessary to explicitly load =jedi=.
-
 
 * Reveal.js
 
+Nice to have played with it, but I never use it.
 #+begin_src emacs-lisp
-(use-package ox-reveal
-  :after org-mode
-  :config
-    (require 'ox-reveal)
-    (setq org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/")
-    (setq org-reveal-mathjax t)
-)
+;; (use-package ox-reveal
+;;   :after org-mode
+;;   :config
+;;     (require 'ox-reveal)
+;;     (setq org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/")
+;;     (setq org-reveal-mathjax t)
+;; )
 #+end_src
 
 * Jupyter and ipython
@@ -1038,10 +1137,10 @@ I don't use jupyter or ipyton, but org babel.
 
 * csv
 #+begin_src emacs-lisp
-(use-package csv-mode
-  :disabled
-  :mode ("\\.[Cc][Ss][Vv]\\'" . csv-mode)
-  :config (setq csv-separators '("," ";" "|" " ")))
+;; (use-package csv-mode
+;;   :disabled
+;;   :mode ("\\.[Cc][Ss][Vv]\\'" . csv-mode)
+;;   :config (setq csv-separators '("," ";" "|" " ")))
 #+end_src
 
 * magit
@@ -1049,10 +1148,10 @@ I don't use jupyter or ipyton, but org babel.
 I don't seem to use this.
 
 #+begin_src emacs-lisp
-(use-package magit
-  :disabled
-  :bind (("C-x g" . magit-status))
-  )
+;; (use-package magit
+;;   :disabled
+;;   :bind (("C-x g" . magit-status))
+;;   )
 #+end_src
 
 * Atomic chrome
@@ -1061,13 +1160,13 @@ Type emails and boxes within emacs. I never use it though.
 https://github.com/imjonathan/atomic-chrome
 
 #+begin_src emacs-lisp
-(use-package atomic-chrome
-  :disabled
-  :commands atomic-chrome-start-server
-  :config
-  (atomic-chrome-start-server)
-  (setq atomic-chrome-buffer-open-style 'frame)
-  )
+;; (use-package atomic-chrome
+;;   :disabled
+;;   :commands atomic-chrome-start-server
+;;   :config
+;;   (atomic-chrome-start-server)
+;;   (setq atomic-chrome-buffer-open-style 'frame)
+;;   )
 #+end_src
 
 Kill frame with =kill-frame= with keychord =C-x 5 0=.

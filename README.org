@@ -614,18 +614,18 @@ rm frac
 #+begin_src emacs-lisp
 ;(use-package prescient)                 ;
 ;(use-package selectrum-prescient)
-(straight-use-package 'orderless)
+; (straight-use-package 'orderless)
 ; (straight-use-package 'prescient)
-(straight-use-package 'selectrum)
-(straight-use-package 'selectrum-prescient)
-(straight-use-package 'consult)
+; (straight-use-package 'selectrum)
+; (straight-use-package 'selectrum-prescient)
+; (straight-use-package 'consult)
 ; (straight-use-package 'ivy-prescient)
-(straight-use-package 'company-prescient)
-(selectrum-mode +1)
-(selectrum-prescient-mode +1)
-(prescient-persist-mode +1)
+;; (straight-use-package 'company-prescient)
+;; (selectrum-mode +1)
+;; (selectrum-prescient-mode +1)
+;; (prescient-persist-mode +1)
 
-(global-set-key [C-tab] 'consult-buffer)
+; (global-set-key [C-tab] 'consult-buffer)
 #+end_src
 
 (global-set-key (kbd "<f7>") 'consult-outline)
@@ -635,13 +635,15 @@ rm frac
 
 * Smex
 A convenient interface to recently and most frequently used commands.
-<2021-03-21 zo> I moved to selectrum and prescient for the moment.
+- <2021-03-21 zo> I moved to selectrum and prescient for the moment.
+- <2021-04-10 za> I moved back to smex and ido, as I find that more convient.
 
-# #+begin_src emacs-lisp
-# ;; (use-package smex
-# ;;   :bind (("M-x" . smex))
-# ;;   :config (smex-initialize) )
-# #+end_src
+
+#+begin_src emacs-lisp
+(use-package smex
+  :bind (("M-x" . smex))
+  :config (smex-initialize) )
+#+end_src
 
 
 * ido
@@ -655,29 +657,30 @@ Defering also turns out not to be a good idea, because nearly the first thing I 
 Hence, I seem to need ido directly anyway.
 
 #+begin_src emacs-lisp
-;; (use-package ido
-;;   :demand t
-;;   ; :commands (ido-find-file)
-;;   :config
-;;   (setq ido-everywhere t
-;;     ido-enable-flex-matching t ;; show any name that has the typed characters
-;;     ido-use-virtual-buffers t  ;; list of past visited files
-;;     ido-create-new-buffer 'always  ;; do not ask to create new buffer when C-x b
-;;     confirm-nonexistent-file-or-buffer nil  ;; also do not ask to confirm in case of C-x b
-;;     ido-default-buffer-method 'selected-window
-;;     ido-file-extensions-order '(".tex" ".py")
-;;     completion-ignored-extensions '(".o" ".pdf" "~" ".bin" ".ilg" ".idx" ".ind" ".log"
-;;                                       ".obj" ".map" ".a" ".so" ".pytxcode" ".toc" ".rel" ".out"
-;;                                       ".mod" ".aux" ".out" ".pyg" ".bbl" ".blg")
-;;     ido-ignore-extensions t  ;; ignore files with the above extensions
-;;     ido-ignore-directories '("auto" "_minted*" "__pycache__" ".git") ;; this works with C-x d, but not with C-x C-f
-;;     ido-ignore-files '("auto" "_minted*" "__pycache__") ;; this works with C-x C-f
-;;     )
-;;   (ido-mode t) )
+(use-package ido
+  :demand t
+  ; :commands (ido-find-file)
+  :config
+  (setq ido-everywhere t
+    ido-enable-flex-matching t ;; show any name that has the typed characters
+    ido-use-virtual-buffers t  ;; list of past visited files
+    ido-create-new-buffer 'always  ;; do not ask to create new buffer when C-x b
+    confirm-nonexistent-file-or-buffer nil  ;; also do not ask to confirm in case of C-x b
+    ido-default-buffer-method 'selected-window
+    ido-file-extensions-order '(".tex" ".py")
+    completion-ignored-extensions '(".o" ".pdf" "~" ".bin" ".ilg" ".idx" ".ind" ".log"
+                                      ".obj" ".map" ".a" ".so" ".pytxcode" ".toc" ".rel" ".out"
+                                      ".mod" ".aux" ".out" ".pyg" ".bbl" ".blg")
+    ido-ignore-extensions t  ;; ignore files with the above extensions
+    ido-ignore-directories '("auto" "_minted*" "__pycache__" ".git") ;; this works with C-x d, but not with C-x C-f
+    ido-ignore-files '("auto" "_minted*" "__pycache__") ;; this works with C-x C-f
+    )
+  (ido-mode t) )
 #+end_src
 
-I don't think I'll need ivy or helm for my purposes.
-<2021-03-21 zo> For the moment I switch to using prescient and selectrum.
+- I don't think I'll need ivy or helm for my purposes.
+- <2021-03-21 zo> For the moment I switch to using prescient and selectrum.
+- <2021-04-10 za> I moved back to ido and smex.
 
 * Theming
 
@@ -697,9 +700,17 @@ I don't think I'll need ivy or helm for my purposes.
   :bind ("<f5>" . modus-themes-toggle))
 #+end_src
 
-For normal work I use the material theme.
+I use the following setting for youtube demos.
 
-#+begin_src emacs-lisp
+# +begin_src emacs-lisp
+(modus-themes-load-operandi)
+(set-face-attribute 'default nil :height 95)
+#+end_src
+
+
+I used the material theme, but I moved to the modus themes of Protesilaos.
+
+# +begin_src emacs-lisp
 ;; (use-package material-theme
 ;;   :demand t)
 #+end_src
